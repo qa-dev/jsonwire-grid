@@ -13,6 +13,7 @@ import (
 	"jsonwire-grid/middleware"
 	"jsonwire-grid/pool"
 	poolMetrics "jsonwire-grid/pool/metrics"
+	mysqlMigrations "jsonwire-grid/storage/migrations/mysql"
 	"jsonwire-grid/storage/mysql"
 	"jsonwire-grid/utils/metrics"
 	"net/http"
@@ -38,8 +39,10 @@ func main() {
 	}
 	storage := mysql.NewMysqlStorage(db)
 
-	migrations := &migrate.FileMigrationSource{
-		Dir: "storage/migrations/mysql",
+	migrations := &migrate.AssetMigrationSource{
+		Asset:    mysqlMigrations.Asset,
+		AssetDir: mysqlMigrations.AssetDir,
+		Dir:      "storage/migrations/mysql",
 	}
 	n, err := migrate.Exec(db.DB, "mysql", migrations, migrate.Up)
 	if err != nil {

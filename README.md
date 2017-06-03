@@ -3,17 +3,18 @@ Golang implementation of Selenium Grid (hub).
 
 ## HowTo
 #### Run binary file
-1. download binary file
+1. download binary file and
 1. `export CONFIG_PATH=./config.json`
-1. `./webdriver-{platform_name}`
+1. `./jsonwire-grid`
 
 ### Run From Source
 #### Requirements
 * Go >= 1.8.1
-1. `git clone https://github.com/qa-dev/webdriver-grid .`
-1. `cd webdriver-grid`
-1. `export CONFIG_PATH=./config.json`
-1. `go run main.go`
+* [go-bindata](https://github.com/jteeuwen/go-bindata)
+1. `git clone https://github.com/qa-dev/jsonwire-grid .`
+1. `cd jsonwire-grid`
+1. `cp config-sample.json config.json`
+1. `make run`
 
 ## HowToUse
 1. Run app

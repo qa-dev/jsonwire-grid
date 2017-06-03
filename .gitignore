@@ -23,3 +23,5 @@
 
 # Your local config
 config.json
+bindata.go
+dist/
