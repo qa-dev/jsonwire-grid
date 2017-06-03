@@ -1,0 +1,7 @@
+build:
+  goos:
+    - windows
+    - darwin
+    - linux
+hooks:
+    pre: make prepare
