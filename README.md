@@ -1,4 +1,4 @@
-# ~~jsonwire-grid~~WebDriverGrid
+# ~~jsonwire-grid~~WebDriverGrid [![Build Status](https://travis-ci.org/qa-dev/jsonwire-grid.svg?branch=master)](https://travis-ci.org/qa-dev/jsonwire-grid)
 Golang implementation of Selenium Grid (hub).
 
 ## HowTo
