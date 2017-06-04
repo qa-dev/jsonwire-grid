@@ -10,8 +10,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 
 	"errors"
-	"jsonwire-grid/jsonwire"
-	"jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
+	"github.com/qa-dev/jsonwire-grid/pool"
 )
 
 type CreateSessionTransport struct {

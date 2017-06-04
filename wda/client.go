@@ -2,7 +2,7 @@ package wda
 
 import (
 	"encoding/json"
-	"jsonwire-grid/jsonwire"
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"io/ioutil"
 	"net/http"
 	"net/url"

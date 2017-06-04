@@ -7,7 +7,7 @@ import (
 	"regexp"
 
 	log "github.com/Sirupsen/logrus"
-	"jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/pool"
 )
 
 type UseSession struct {

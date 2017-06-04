@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	"jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/pool"
 	"sort"
 	"strconv"
 	"strings"

@@ -2,7 +2,7 @@ package storage
 
 import (
 	"github.com/stretchr/testify/assert"
-	"jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/pool"
 	"testing"
 )
 
