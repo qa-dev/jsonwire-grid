@@ -1,7 +1,10 @@
 # ~~jsonwire-grid~~WebDriverGrid [![Build Status](https://travis-ci.org/qa-dev/jsonwire-grid.svg?branch=master)](https://travis-ci.org/qa-dev/jsonwire-grid)
-Golang implementation of Selenium Grid (hub).
+This is scalable Golang implementation of Selenium Grid (hub).
 
 ## HowTo
+1. Install MySql
+1. Set in config.json your db connesction string `[username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]`
+1. Run app
 #### Run binary file
 1. download binary file and
 1. `export CONFIG_PATH=./config.json`
