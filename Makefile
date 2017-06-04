@@ -1,5 +1,5 @@
 export CONFIG_PATH=./config.json
-all: build
+all: get-deps build
 
 .PHONY: help build fmt clean run test coverage check vet lint doc cfpush
 
@@ -18,6 +18,9 @@ fmt:
 
 gen:
 	go-bindata -pkg mysql -o storage/migrations/mysql/bindata.go storage/migrations/mysql
+
+get-deps:
+	go get -u github.com/jteeuwen/go-bindata/...
 
 prepare: fmt gen
 

@@ -1,0 +1,12 @@
+language: go
+
+go:
+  - 1.8.x
+
+install: make get-deps
+script: go test ./...
+services:
+  - mysql
+
+env:
+  - TEST_MYSQL_CONNECTION="root:@(127.0.0.1:3306)/%dbname%?tx_isolation=SERIALIZABLE&parseTime=true"
