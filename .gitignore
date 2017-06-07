@@ -25,3 +25,4 @@
 config.json
 bindata.go
 dist/
+dbconfig.yml
