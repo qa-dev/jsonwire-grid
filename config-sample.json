@@ -3,6 +3,7 @@
     "level": 6
   },
   "db": {
+      "implementation": "mysql",
       "connection": "root:@(localhost:3306)/grid?tx_isolation=SERIALIZABLE&parseTime=true"
   },
   "grid": {

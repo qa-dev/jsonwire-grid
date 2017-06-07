@@ -32,6 +32,7 @@ type Logger struct {
 }
 
 type DB struct {
+	Implementation string `json:"implementation"`
 	Connection string `json:"connection"`
 }
 

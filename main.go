@@ -4,18 +4,13 @@ import (
 	"context"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
 	"github.com/qa-dev/jsonwire-grid/config"
 	"github.com/qa-dev/jsonwire-grid/handlers"
 	"github.com/qa-dev/jsonwire-grid/logger"
 	"github.com/qa-dev/jsonwire-grid/middleware"
 	"github.com/qa-dev/jsonwire-grid/pool"
 	poolMetrics "github.com/qa-dev/jsonwire-grid/pool/metrics"
-	mysqlMigrations "github.com/qa-dev/jsonwire-grid/storage/migrations/mysql"
-	"github.com/qa-dev/jsonwire-grid/storage/mysql"
 	"github.com/qa-dev/jsonwire-grid/utils/metrics"
-	"github.com/rubenv/sql-migrate"
 	"net/http"
 	"os"
 	"os/signal"
@@ -29,26 +24,9 @@ func main() {
 	cfg := config.New()
 	err := cfg.LoadFromFile(os.Getenv("CONFIG_PATH"))
 	if err != nil {
-		log.Fatalf("Problem in loading config from file, %s", err.Error())
+		log.Fatalf("Problem in loading config from file, %s", err)
 	}
 	logger.Init(cfg.Logger)
-
-	db, err := sqlx.Open("mysql", cfg.DB.Connection)
-	if err != nil {
-		log.Fatalf("Database connection error: %s", err.Error())
-	}
-	storage := mysql.NewMysqlStorage(db)
-
-	migrations := &migrate.AssetMigrationSource{
-		Asset:    mysqlMigrations.Asset,
-		AssetDir: mysqlMigrations.AssetDir,
-		Dir:      "storage/migrations/mysql",
-	}
-	n, err := migrate.Exec(db.DB, "mysql", migrations, migrate.Up)
-	if err != nil {
-		log.Fatalf("Migrations failed, %s", err.Error())
-	}
-	fmt.Printf("Applied %d migrations!\n", n)
 
 	statsdClient, err := metrics.NewStatsd(
 		cfg.Statsd.Host,
@@ -58,13 +36,17 @@ func main() {
 		cfg.Statsd.Enable)
 
 	if nil != err {
-		log.Errorf("Statsd create socked error: %s", err.Error())
+		log.Errorf("Statsd create socked error: %s", err)
 	}
 
 	busyNodeDuration, err := time.ParseDuration(cfg.Grid.BusyNodeDuration)
 	reservedNodeDuration, err := time.ParseDuration(cfg.Grid.BusyNodeDuration)
 	if err != nil {
-		panic("Invalid value grid.busy_node_duration in config")
+		log.Fatal("Invalid value grid.busy_node_duration in config")
+	}
+	storage, err := invokeStorage(*cfg)
+	if err != nil {
+		log.Fatalf("Can't invoke storage, %s", err)
 	}
 	poolInstance := pool.NewPool(storage)
 	poolInstance.SetBusyNodeDuration(busyNodeDuration)
@@ -94,7 +76,7 @@ func main() {
 		err = server.ListenAndServe()
 		if err != nil {
 			// todo: норма ли что при закрытии всегда возвращается еррор???
-			log.Errorf("Listen serve error, %s", err.Error())
+			log.Errorf("Listen serve error, %s", err)
 		}
 	}()
 
