@@ -5,8 +5,8 @@ import (
 )
 
 type Message struct {
-	SessionId string        `json:"sessionId"`
-	Status    int           `json:"status"`
+	SessionId string      `json:"sessionId"`
+	Status    int         `json:"status"`
 	Value     interface{} `json:"value"`
 }
 
@@ -26,9 +26,9 @@ type Sessions struct {
 }
 
 type Register struct {
-	Class            string             `json:"class"`
+	Class            string         `json:"class"`
 	Configuration    *Configuration `json:"configuration"`
-	CapabilitiesList []Capabilities     `json:"capabilities"` // selenium 3
+	CapabilitiesList []Capabilities `json:"capabilities"` // selenium 3
 }
 
 type Capabilities map[string]interface{}
@@ -50,8 +50,8 @@ type Configuration struct {
 }
 
 type ApiProxy struct {
-	ID string `json:"id"`
+	ID      string      `json:"id"`
 	Request interface{} `json:"request"` //todo: пока не ясно зачем он нужен
-	Msg string `json:"msg"`
-	Success bool `json:"success"`
+	Msg     string      `json:"msg"`
+	Success bool        `json:"success"`
 }

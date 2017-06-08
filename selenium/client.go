@@ -2,12 +2,12 @@ package selenium
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
-	"errors"
 )
 
 type Client struct {
@@ -102,7 +102,7 @@ func (req request) send(outputStruct interface{}) error {
 	}
 	err = json.Unmarshal(body, outputStruct)
 	if err != nil {
-		err = errors.New("can't unmarshal response ["+ string(body)+"], " + err.Error())
+		err = errors.New("can't unmarshal response [" + string(body) + "], " + err.Error())
 		return err
 	}
 	return nil

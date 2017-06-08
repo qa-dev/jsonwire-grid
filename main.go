@@ -44,9 +44,13 @@ func main() {
 	if err != nil {
 		log.Fatal("Invalid value grid.busy_node_duration in config")
 	}
-	storage, err := invokeStorage(*cfg)
+	storageFactory, err := invokeStorageFactory(*cfg)
 	if err != nil {
-		log.Fatalf("Can't invoke storage, %s", err)
+		log.Fatalf("Can't invoke storage factory, %s", err)
+	}
+	storage, err := storageFactory.Create(*cfg)
+	if err != nil {
+		log.Fatalf("Can't create storage factory, %s", err)
 	}
 	poolInstance := pool.NewPool(storage)
 	poolInstance.SetBusyNodeDuration(busyNodeDuration)
