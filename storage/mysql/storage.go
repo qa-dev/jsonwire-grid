@@ -155,7 +155,7 @@ func (s *MysqlStorage) ReserveAvailable(capabilities pool.Capabilities) (node po
 				WHERE `+where+`
 			GROUP BY c.setId
 			HAVING count(c.setId) =  `+countCapabilities+`
-			ORDER BY n.updated ASC
+			ORDER BY n.updated DESC
 			LIMIT 1
 			FOR UPDATE
 		`,
@@ -163,7 +163,7 @@ func (s *MysqlStorage) ReserveAvailable(capabilities pool.Capabilities) (node po
 			StructScan(nodeModel)
 	default:
 		err = tx.QueryRowx(
-			`SELECT n.* FROM node n WHERE `+where+` ORDER BY n.updated ASC LIMIT 1 FOR UPDATE`,
+			`SELECT n.* FROM node n WHERE `+where+` ORDER BY n.updated DESC LIMIT 1 FOR UPDATE`,
 			args...).
 			StructScan(nodeModel)
 	}

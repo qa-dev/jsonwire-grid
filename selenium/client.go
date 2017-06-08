@@ -2,6 +2,7 @@ package selenium
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"io/ioutil"
 	"net/http"
@@ -39,10 +40,15 @@ func (c *Client) Sessions() (*jsonwire.Sessions, error) {
 	}
 	request, err := newRequest(http.MethodGet, reqUrl.String(), "")
 	if err != nil {
+		err = errors.New("Cant create request, " + err.Error())
 		return nil, err
 	}
 	var sessions jsonwire.Sessions
 	err = request.send(&sessions)
+	if err != nil {
+		err = errors.New("Cant read response, " + err.Error())
+		return nil, err
+	}
 	return &sessions, err
 }
 
@@ -54,10 +60,15 @@ func (c *Client) CloseSession(sessionId string) (*jsonwire.Message, error) {
 	}
 	request, err := newRequest(http.MethodDelete, reqUrl.String(), "")
 	if err != nil {
+		err = errors.New("Cant create request, " + err.Error())
 		return nil, err
 	}
 	var message jsonwire.Message
 	err = request.send(&message)
+	if err != nil {
+		err = errors.New("Cant send response, " + err.Error())
+		return nil, err
+	}
 	return &message, err
 }
 
@@ -79,16 +90,19 @@ func newRequest(method, url string, requestBodyContent string) (*request, error)
 func (req request) send(outputStruct interface{}) error {
 	resp, err := http.DefaultClient.Do(req.httpRequest)
 	if err != nil {
+		err = errors.New("can't send request, " + err.Error())
 		return err
 	}
 	defer resp.Body.Close()
 	// todo: Получение респонза и разбор пока здесь.
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		err = errors.New("can't read response body, " + err.Error())
 		return err
 	}
 	err = json.Unmarshal(body, outputStruct)
 	if err != nil {
+		err = errors.New("can't unmarshal response [" + string(body) + "], " + err.Error())
 		return err
 	}
 	return nil

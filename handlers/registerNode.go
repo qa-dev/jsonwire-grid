@@ -7,35 +7,12 @@ import (
 	"strconv"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"github.com/qa-dev/jsonwire-grid/pool"
 )
 
 type RegisterNode struct {
 	Pool *pool.Pool
-}
-
-type registerJson struct {
-	Class            string             `json:"class"`
-	Configuration    *configurationJson `json:"configuration"`
-	CapabilitiesList []Capabilities     `json:"capabilities"` // selenium 3
-}
-
-type Capabilities map[string]interface{}
-
-type configurationJson struct {
-	Proxy            string
-	Role             string
-	Hub              string
-	Port             int
-	RemoteHost       string
-	Host             string
-	MaxSession       int
-	HubHost          string
-	RegisterCycle    int
-	HubPort          int
-	Url              string
-	Register         bool
-	CapabilitiesList []Capabilities `json:"capabilities"` // selenium 2
 }
 
 func (h *RegisterNode) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -47,7 +24,7 @@ func (h *RegisterNode) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body.Close()
-	var register registerJson
+	var register jsonwire.Register
 	err = json.Unmarshal(body, &register)
 	if err != nil {
 		errorMessage := "Can't unmarshal register json:  " + err.Error()
@@ -56,7 +33,7 @@ func (h *RegisterNode) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var capabilitiesList []Capabilities
+	var capabilitiesList []jsonwire.Capabilities
 
 	//todo: знаю что костыль, переделаю
 	if len(register.Configuration.CapabilitiesList) > 0 {

@@ -25,7 +25,7 @@ func (h *CreateSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	var capabilities map[string]Capabilities
+	var capabilities map[string]jsonwire.Capabilities
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		errorMessage := "Error reading request: " + err.Error()
@@ -80,7 +80,7 @@ func (h *CreateSession) tryCreateSession(r *http.Request, capabilities *pool.Cap
 	seleniumNode := jsonwire.NewNode(seleniumClient)
 	_, err = seleniumNode.RemoveAllSessions()
 	if err != nil {
-		log.Warn("Can't remove all sessions from node, go to next available node: " + node.String())
+		log.Warn("Can't remove all sessions from node: " + err.Error() + ", go to next available node: " + node.String())
 		h.Pool.Remove(node)
 		return h.tryCreateSession(r, capabilities)
 	}

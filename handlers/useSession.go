@@ -20,7 +20,7 @@ func (h *UseSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if len(parsedUrl) != 3 {
 		errorMessage := "url [" + r.URL.Path + "] parsing error"
 		log.Infof(errorMessage)
-		http.Error(rw, errorMessage, http.StatusInternalServerError)
+		http.Error(rw, errorMessage, http.StatusBadRequest)
 		return
 	}
 	sessionId := re.FindStringSubmatch(r.URL.Path)[1]
@@ -33,7 +33,7 @@ func (h *UseSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		// посылаем сообщение о том что сессия не найдена
 		errorMessage = "session " + sessionId + " not found in node pool: " + errorMessage
 		log.Infof(errorMessage)
-		http.Error(rw, errorMessage, http.StatusInternalServerError)
+		http.Error(rw, errorMessage, http.StatusNotFound)
 		return
 	}
 

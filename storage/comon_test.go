@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"github.com/stretchr/testify/assert"
 	"github.com/qa-dev/jsonwire-grid/pool"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 

@@ -3,9 +3,9 @@ package config
 import (
 	"encoding/json"
 	"errors"
+	"github.com/Sirupsen/logrus"
 	log "github.com/Sirupsen/logrus"
 	"os"
-	"github.com/Sirupsen/logrus"
 )
 
 type Config struct {
@@ -32,7 +32,8 @@ type Logger struct {
 }
 
 type DB struct {
-	Connection string `json:"connection"`
+	Implementation string `json:"implementation"`
+	Connection     string `json:"connection"`
 }
 
 type Statsd struct {
