@@ -2,16 +2,17 @@ package mysql
 
 import (
 	"errors"
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
+	"fmt"
+	"strings"
 )
 
 type MysqlNodeModel struct {
+	ID         string `db:"id"`
 	Type       string `db:"type"`
 	Address    string `db:"address"`
 	Status     string `db:"status"`
@@ -53,7 +54,7 @@ func (s *MysqlStorage) Add(node pool.Node) error {
 		err = errors.New("[MysqlStorage/Add] Can't insert new node: " + err.Error())
 		return err
 	}
-	_, err = s.db.Exec("DELETE FROM capabilities WHERE nodeAddress = ?", node.Address)
+	_, err = tx.Exec("DELETE FROM capabilities WHERE nodeAddress = ?", node.Address)
 	if err != nil {
 		tx.Rollback()
 		err = errors.New("[MysqlStorage/Add] Can't delete old capabilities: " + err.Error())
@@ -74,7 +75,7 @@ func (s *MysqlStorage) Add(node pool.Node) error {
 	}
 
 	for _, preparedCapability := range preparedCapabilities {
-		_, err = s.db.NamedExec(
+		_, err = tx.NamedExec(
 			"INSERT INTO capabilities (nodeAddress, setId, name, value) "+
 				"VALUES (:nodeAddress, :setId, :name, :value)",
 			preparedCapability,
@@ -144,6 +145,7 @@ func (s *MysqlStorage) ReserveAvailable(capabilities pool.Capabilities) (node po
 		err = tx.QueryRowx(
 			`
 				SELECT
+					n.id,
 					n.type,
 					n.status,
 					n.address,
@@ -151,11 +153,10 @@ func (s *MysqlStorage) ReserveAvailable(capabilities pool.Capabilities) (node po
 					n.updated,
 					n.registred
 				FROM node n
-				LEFT JOIN capabilities c ON n.address = c.nodeAddress
-				WHERE `+where+`
+				LEFT JOIN capabilities c ON n.address = c.nodeAddress AND `+where+`
 			GROUP BY c.setId
 			HAVING count(c.setId) =  `+countCapabilities+`
-			ORDER BY n.updated DESC
+			ORDER BY n.updated ASC
 			LIMIT 1
 			FOR UPDATE
 		`,
@@ -163,7 +164,7 @@ func (s *MysqlStorage) ReserveAvailable(capabilities pool.Capabilities) (node po
 			StructScan(nodeModel)
 	default:
 		err = tx.QueryRowx(
-			`SELECT n.* FROM node n WHERE `+where+` ORDER BY n.updated DESC LIMIT 1 FOR UPDATE`,
+			`SELECT n.* FROM node n WHERE `+where+` ORDER BY n.updated ASC LIMIT 1 FOR UPDATE`,
 			args...).
 			StructScan(nodeModel)
 	}

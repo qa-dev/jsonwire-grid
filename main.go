@@ -40,9 +40,12 @@ func main() {
 	}
 
 	busyNodeDuration, err := time.ParseDuration(cfg.Grid.BusyNodeDuration)
-	reservedNodeDuration, err := time.ParseDuration(cfg.Grid.BusyNodeDuration)
 	if err != nil {
 		log.Fatal("Invalid value grid.busy_node_duration in config")
+	}
+	reservedNodeDuration, err := time.ParseDuration(cfg.Grid.ReservedDuration)
+	if err != nil {
+		log.Fatal("Invalid value grid.reserved_node_duration in config")
 	}
 	storageFactory, err := invokeStorageFactory(*cfg)
 	if err != nil {
