@@ -67,7 +67,13 @@ func (h *CreateSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CreateSession) tryCreateSession(r *http.Request, capabilities *pool.Capabilities) (*proxy.ResponseWriter, error) {
-	//todo: если запрос отменить, все равно получение ноды будет повторяться, придумать как это предотвратить
+	select {
+	case <-r.Context().Done():
+		err := errors.New("Request cancelled by client, " + r.Context().Err().Error())
+		return nil, err
+	default:
+	}
+
 	node, err := h.Pool.ReserveAvailableNode(*capabilities)
 	if err != nil {
 		return nil, errors.New("reserve node error: " + err.Error())
