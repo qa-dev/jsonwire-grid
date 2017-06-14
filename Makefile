@@ -1,5 +1,4 @@
 export CONFIG_PATH=./config.json
-
 TEST_CONFIG_PATH=./config-test.json
 all: get-deps build
 
@@ -13,7 +12,8 @@ help:
 	@echo "run      - start application"
 
 build: prepare
-	go build -o ${GOPATH}/bin/service-entrypoint
+	@echo "Install jsonwire-grid"
+	go install github.com/qa-dev/jsonwire-grid
 
 fmt:
 	go fmt
@@ -27,18 +27,27 @@ get-deps:
 prepare: fmt gen
 
 run: build
-	${GOPATH}/bin/service-entrypoint
+	@echo "Start jsonwire-grid"
+	jsonwire-grid
 
 test:
 	go test ./...
 
 concurrency-test-prepare: build
+	@echo "Install jsonwire-grid"
 	go install github.com/qa-dev/jsonwire-grid/testing/webdriver-node-mock
+	@echo "Install webdriver-node-mock"
 	go install github.com/qa-dev/jsonwire-grid/testing/webdriver-mock-creator
+	@echo "Install webdriver-mock-creator"
 	go install github.com/qa-dev/jsonwire-grid/testing/webdriver-concurrency-test
-	nohupkillall -9 service-entrypoint >/dev/null 2>&1 &
-	CONFIG_PATH=$(TEST_CONFIG_PATH) ${GOPATH}/bin/service-entrypoint &
+	@echo "Kill all running jsonwire-grid"
+	killall -9 jsonwire-grid &
+	@echo "Wait 1s"
+	sleep 1
+	@echo "Start jsonwire-grid"
+	CONFIG_PATH=$(TEST_CONFIG_PATH) jsonwire-grid &
 
 concurrency-test: concurrency-test-prepare
+	@echo "Start webdriver-concurrency-test"
 	webdriver-concurrency-test
 

@@ -33,7 +33,7 @@ func main() {
 	}()
 
 	for port := *startPort; port < *startPort+*countNodes && isAlive; port++ {
-		time.Sleep(time.Millisecond)
+		time.Sleep(time.Millisecond * 5)
 		cmd := exec.Command(
 			"webdriver-node-mock",
 			fmt.Sprintf("-hub=%v", *hubUrl),

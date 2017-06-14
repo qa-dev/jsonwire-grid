@@ -4,7 +4,7 @@
   },
   "db": {
       "implementation": "mysql",
-      "connection": "root:@(127.0.0.1:3306)/grid?tx_isolation=SERIALIZABLE&parseTime=true"
+      "connection": "root:@(127.0.0.1:3306)/grid?tx_isolation=SERIALIZABLE&parseTime=true&interpolateParams=true"
   },
   "grid": {
     "port": 4444,
