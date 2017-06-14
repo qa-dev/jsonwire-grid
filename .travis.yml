@@ -4,7 +4,9 @@ go:
   - 1.8.x
 
 install: make get-deps prepare
-script: go test ./...
+script:
+  - make test
+  - make concurrency-test
 services:
   - mysql
 

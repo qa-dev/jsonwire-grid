@@ -43,7 +43,7 @@ func main() {
 
 	go func() {
 		for {
-			<-time.Tick(time.Second)
+			time.Sleep(time.Second)
 			err := sendApiProxy()
 			if err != nil {
 				log.Errorf("Error send [api/proxy], ", err)
