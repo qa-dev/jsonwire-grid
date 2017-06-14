@@ -1,0 +1,27 @@
+{
+  "logger": {
+    "level": 3
+  },
+  "db": {
+      "implementation": "mysql",
+      "connection": "root:@(127.0.0.1:3306)/grid?tx_isolation=SERIALIZABLE&parseTime=true"
+  },
+  "grid": {
+    "port": 4444,
+    "strategy_list": [
+      {
+        "type": "default",
+        "limit": 0
+      }
+    ],
+    "busy_node_duration": "15m",
+    "reserved_node_duration": "5m"
+  },
+  "statsd": {
+    "host": "statsd-host",
+    "port": 8126,
+    "protocol": "udp",
+    "prefix": "products.tests.qa.debug-dev.jsonwire-grid.",
+    "enable": false
+  }
+}

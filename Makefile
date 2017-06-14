@@ -36,7 +36,8 @@ concurrency-test-prepare: build
 	go install github.com/qa-dev/jsonwire-grid/testing/webdriver-node-mock
 	go install github.com/qa-dev/jsonwire-grid/testing/webdriver-mock-creator
 	go install github.com/qa-dev/jsonwire-grid/testing/webdriver-concurrency-test
-	CONFIG_PATH=$(TEST_CONFIG_PATH) nohup ${GOPATH}/bin/service-entrypoint >/dev/null 2>&1 &
+	nohupkillall -9 service-entrypoint >/dev/null 2>&1 &
+	CONFIG_PATH=$(TEST_CONFIG_PATH) ${GOPATH}/bin/service-entrypoint &
 
 concurrency-test: concurrency-test-prepare
 	webdriver-concurrency-test

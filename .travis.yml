@@ -3,6 +3,9 @@ language: go
 go:
   - 1.8.x
 
+
+before_install:
+  - mysql -e 'CREATE DATABASE grid;'
 install: make get-deps prepare
 script:
   - make test
