@@ -79,15 +79,20 @@ func main() {
 	http.Handle("/", m.Log(&handlers.UseSession{Pool: poolInstance}))
 
 	server := &http.Server{Addr: fmt.Sprintf(":%v", cfg.Grid.Port)}
+	serverError := make(chan error)
 	go func() {
 		err = server.ListenAndServe()
 		if err != nil {
-			// todo: норма ли что при закрытии всегда возвращается еррор???
-			log.Errorf("Listen serve error, %s", err)
+			// todo: норма ли что при вызове server.Shutdown всегда возвращается еррор???
+			serverError <- err
 		}
 	}()
 
-	<-stop
+	select {
+	case err = <-serverError:
+		log.Fatalf("Server error, %s", err)
+	case <-stop:
+	}
 
 	log.Info("Shutting down the server...")
 

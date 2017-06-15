@@ -7,6 +7,6 @@ ENV CONFIG_PATH ./config.json
 
 RUN make
 
-CMD ["service-entrypoint"]
+CMD ["jsonwire-grid"]
 
 EXPOSE 4444

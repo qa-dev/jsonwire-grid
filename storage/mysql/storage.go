@@ -2,13 +2,13 @@ package mysql
 
 import (
 	"errors"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"sort"
 	"strconv"
-	"time"
-	"fmt"
 	"strings"
+	"time"
 )
 
 type MysqlNodeModel struct {
