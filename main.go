@@ -55,7 +55,21 @@ func main() {
 	if err != nil {
 		log.Fatalf("Can't create storage factory, %s", err)
 	}
-	poolInstance := pool.NewPool(storage)
+	strategyFactoryList, err := invokeStrategyFactoryList(*cfg, storage)
+	if err != nil {
+		log.Fatalf("Can't create strategy factory list, %s", err)
+	}
+	var strategyList []pool.StrategyInterface
+	for _, strategyFactory := range strategyFactoryList {
+		strategy, err := strategyFactory.Create(*cfg, storage)
+		if err != nil {
+			log.Fatalf("Can't create strategy, %s", err)
+		}
+		strategyList = append(strategyList, strategy)
+	}
+
+	strategyListStruct := pool.NewStrategyList(strategyList)
+	poolInstance := pool.NewPool(storage, strategyListStruct)
 	poolInstance.SetBusyNodeDuration(busyNodeDuration)
 	poolInstance.SetReservedNodeDuration(reservedNodeDuration)
 

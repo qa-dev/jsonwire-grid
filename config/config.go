@@ -23,8 +23,16 @@ type Grid struct {
 }
 
 type Strategy struct {
-	Type  string `json:"type"`
-	Limit int    `json:"limit"`
+	Config   map[string]string `json:"config"` // ex. docker config, kubernetes config, etc.
+	Type     string            `json:"type"`
+	Limit    int               `json:"limit"`
+	NodeList []Node            `json:"node_list"`
+}
+
+type Node struct {
+	Config       map[string]string      `json:"config"` // ex. image_name, etc.
+	Capabilities map[string]interface{} `json:"capabilities"`
+	Limit        int                    `json:"limit"`
 }
 
 type Logger struct {

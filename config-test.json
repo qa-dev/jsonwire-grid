@@ -10,8 +10,7 @@
     "port": 4444,
     "strategy_list": [
       {
-        "type": "default",
-        "limit": 0
+        "type": "persistent"
       }
     ],
     "busy_node_duration": "15m",

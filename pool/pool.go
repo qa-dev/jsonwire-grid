@@ -26,14 +26,25 @@ type StorageInterface interface {
 	Remove(Node) error
 }
 
+type StrategyInterface interface {
+	Reserve(Capabilities) (Node, error)
+	CleanUp(Node) error
+}
+
 type Pool struct {
 	storage              StorageInterface
 	busyNodeDuration     time.Duration
 	reservedNodeDuration time.Duration
+	strategyList         StrategyListInterface
 }
 
-func NewPool(storage StorageInterface) *Pool {
-	return &Pool{storage, defaultBusyNodeDuration, defaultReservedNodeDuration}
+func NewPool(storage StorageInterface, strategyList StrategyListInterface) *Pool {
+	return &Pool{
+		storage:              storage,
+		busyNodeDuration:     defaultBusyNodeDuration,
+		reservedNodeDuration: defaultReservedNodeDuration,
+		strategyList:         strategyList,
+	}
 }
 
 func (p *Pool) SetBusyNodeDuration(duration time.Duration) {
@@ -45,11 +56,12 @@ func (p *Pool) SetReservedNodeDuration(duration time.Duration) {
 }
 
 // TODO: research close transaction and defer close mysql result body.
-func (p *Pool) ReserveAvailableNode(capabilities Capabilities) (*Node, error) {
-	node, err := p.storage.ReserveAvailable(capabilities)
+func (p *Pool) ReserveAvailableNode(caps Capabilities) (*Node, error) {
+	node, err := p.strategyList.Reserve(caps)
 	if err != nil {
 		err = errors.New("Can't reserve available node, " + err.Error())
 		log.Error(err)
+		return nil, err
 	}
 	return &node, err
 }
@@ -91,7 +103,7 @@ func (p *Pool) GetNodeByAddress(address string) (*Node, error) {
 }
 
 func (p *Pool) CleanUpNode(node *Node) error {
-	err := p.storage.SetAvailable(*node)
+	err := p.strategyList.CleanUp(*node)
 	if err != nil {
 		err = errors.New("Can't clean up node: " + err.Error())
 		log.Error(err)

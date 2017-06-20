@@ -1,4 +1,4 @@
-package storage
+package tests
 
 import (
 	"github.com/qa-dev/jsonwire-grid/pool"

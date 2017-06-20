@@ -1,10 +1,12 @@
 package mysql
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/qa-dev/jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/storage"
 	"sort"
 	"strconv"
 	"strings"
@@ -113,6 +115,7 @@ func (s *MysqlStorage) ReserveAvailable(capabilities pool.Capabilities) (node po
 	}
 	args := []interface{}{string(pool.NodeStatusAvailable)}
 
+	var row *sqlx.Row
 	switch {
 	case len(possibleCapabilities) > 0:
 		capsConditionList := []string{}
@@ -142,7 +145,7 @@ func (s *MysqlStorage) ReserveAvailable(capabilities pool.Capabilities) (node po
 		where += " AND (" + strings.Join(capsConditionList, " OR ") + ")"
 
 		countCapabilities := strconv.Itoa(len(capsConditionList))
-		err = tx.QueryRowx(
+		row = tx.QueryRowx(
 			`
 				SELECT
 					n.id,
@@ -160,13 +163,17 @@ func (s *MysqlStorage) ReserveAvailable(capabilities pool.Capabilities) (node po
 			LIMIT 1
 			FOR UPDATE
 		`,
-			args...).
-			StructScan(nodeModel)
+			args...)
 	default:
-		err = tx.QueryRowx(
-			`SELECT n.* FROM node n WHERE `+where+` ORDER BY n.updated ASC LIMIT 1 FOR UPDATE`,
-			args...).
-			StructScan(nodeModel)
+		row = tx.QueryRowx(`SELECT n.* FROM node n WHERE `+where+` ORDER BY n.updated ASC LIMIT 1 FOR UPDATE`, args...)
+	}
+
+	err = row.StructScan(nodeModel)
+
+	if err == sql.ErrNoRows {
+		tx.Rollback()
+		err = storage.ErrNotFound
+		return
 	}
 
 	if err != nil {

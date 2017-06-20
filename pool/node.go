@@ -11,8 +11,8 @@ const (
 type NodeType string
 
 const (
-	NodeTypeRegular   NodeType = "regular"
-	NodeTypeTemporary NodeType = "temporary"
+	NodeTypePersistent NodeType = "persistent"
+	NodeTypeKubernetes NodeType = "kubernetes"
 )
 
 type Node struct {

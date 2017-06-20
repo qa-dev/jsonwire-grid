@@ -1,4 +1,4 @@
-package storage
+package tests
 
 import (
 	"crypto/rand"
@@ -68,7 +68,7 @@ func (p PrepareMysql) CreateStorage() (pool.StorageInterface, func()) {
 	}
 
 	migrations := &migrate.FileMigrationSource{
-		Dir: "migrations/mysql",
+		Dir: "../migrations/mysql",
 	}
 	_, err = migrate.Exec(db.DB, "mysql", migrations, migrate.Up)
 	if err != nil {

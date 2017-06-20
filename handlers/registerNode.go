@@ -46,7 +46,7 @@ func (h *RegisterNode) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		poolCapabilitiesList[i] = pool.Capabilities(value)
 	}
 	err = h.Pool.Add(
-		pool.NodeTypeRegular,
+		pool.NodeTypePersistent,
 		register.Configuration.Host+":"+strconv.Itoa(register.Configuration.Port),
 		poolCapabilitiesList,
 	)
