@@ -28,8 +28,8 @@ var (
 // todo: prototype
 func main() {
 	hubUrl = flag.String("hub", "http://127.0.0.1:4444", "address of hub, default http://127.0.0.1:4444")
-	level = flag.Int("level", 50, "count parallell conections")
-	durationStr = flag.String("duration", "30s", "duration of test, string format ex. 12m, see time.ParseDuration()")
+	level = flag.Int("level", 100, "count parallell conections")
+	durationStr = flag.String("duration", "60s", "duration of test, string format ex. 12m, see time.ParseDuration()")
 	mockMaxDuration := flag.Int("mockMaxDuration", 500, "request duration [0 <=duration], default 0")
 	mockStartPort := flag.Int("mockStartPort", 5000, "mockStartPort")
 	flag.Parse()

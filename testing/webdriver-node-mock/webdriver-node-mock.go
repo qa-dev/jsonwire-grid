@@ -29,7 +29,7 @@ func main() {
 
 	hubUrlFlag := flag.String("hub", "http://127.0.0.1:4444", "address of hub, default http://127.0.0.1:4444")
 	rand.Seed(time.Now().UTC().UnixNano())
-	portFlag := flag.Int("port", rand.Intn(1000)+5000, "port default, rand")
+	portFlag := flag.Int("port", 5555, "port default, rand")
 	maxDurationFlag := flag.Int("maxDuration", 0, "request duration [0 <=duration], default 0")
 	flag.Parse()
 	hubUrl = *hubUrlFlag
@@ -46,7 +46,7 @@ func main() {
 			time.Sleep(time.Second)
 			err := sendApiProxy()
 			if err != nil {
-				log.Errorf("Error send [api/proxy], ", err)
+				log.Errorf("Error send [api/proxy], %s", err)
 			}
 		}
 	}()
@@ -54,6 +54,7 @@ func main() {
 	http.HandleFunc("/wd/hub/session", createSession)
 	http.HandleFunc("/wd/hub/session/", useSession)
 	http.HandleFunc("/wd/hub/sessions", getSessions)
+	http.HandleFunc("/wd/hub/status", status)
 
 	err = http.ListenAndServe(":"+strconv.Itoa(port), nil)
 	if err != nil {

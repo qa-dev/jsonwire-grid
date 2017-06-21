@@ -22,7 +22,7 @@ func (f *Factory) Create(config config.Config) (pool.StorageInterface, error) {
 	}
 
 	db.SetMaxIdleConns(0)  // this is the root problem! set it to 0 to remove all idle connections
-	db.SetMaxOpenConns(50) // or whatever is appropriate for your setup.
+	db.SetMaxOpenConns(10) // or whatever is appropriate for your setup.
 
 	storage := NewMysqlStorage(db)
 

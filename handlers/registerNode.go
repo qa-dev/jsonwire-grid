@@ -9,6 +9,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"github.com/qa-dev/jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 )
 
 type RegisterNode struct {
@@ -41,9 +42,9 @@ func (h *RegisterNode) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	} else {
 		capabilitiesList = register.CapabilitiesList
 	}
-	poolCapabilitiesList := make([]pool.Capabilities, len(capabilitiesList))
+	poolCapabilitiesList := make([]capabilities.Capabilities, len(capabilitiesList))
 	for i, value := range capabilitiesList {
-		poolCapabilitiesList[i] = pool.Capabilities(value)
+		poolCapabilitiesList[i] = capabilities.Capabilities(value)
 	}
 	err = h.Pool.Add(
 		pool.NodeTypePersistent,

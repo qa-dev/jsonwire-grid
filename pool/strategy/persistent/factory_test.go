@@ -1,14 +1,13 @@
 package persistent
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
-	"github.com/qa-dev/jsonwire-grid/config"
+	"testing"
 )
 
 func TestStrategyFactory_Create(t *testing.T) {
 	f := StrategyFactory{}
-	s, err := f.Create(config.Config{}, new(StorageMock))
+	s, err := f.Create(nil, nil, nil)
 	assert.NotNil(t, s)
 	assert.Nil(t, err)
 }

@@ -6,12 +6,23 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
+	"github.com/satori/go.uuid"
 	"math/rand"
 	"net/http"
-	"os/exec"
 	"regexp"
 	"time"
 )
+
+// status return current status
+func status(rw http.ResponseWriter, r *http.Request) {
+	sessions := &jsonwire.Message{}
+	err := json.NewEncoder(rw).Encode(sessions)
+	if err != nil {
+		err = errors.New("Get sessions error, " + err.Error())
+		log.Error(err)
+		json.NewEncoder(rw).Encode(&jsonwire.Message{Value: err.Error(), Status: int(jsonwire.RESPONSE_STATUS_UNKNOWN_ERR)})
+	}
+}
 
 // getSessions return list active sessions
 func getSessions(rw http.ResponseWriter, r *http.Request) {
@@ -56,12 +67,7 @@ func createSession(rw http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(rw).Encode(responseMessage)
 		return
 	}
-
-	out, err := exec.Command("uuidgen").Output()
-	if err != nil {
-		log.Fatalf("Can't generate uuid, %s", err)
-	}
-	currentSessionID = string(out[:len(out)-1]) // cut end of line char
+	currentSessionID = uuid.NewV4().String()
 	json.NewEncoder(rw).Encode(&jsonwire.Message{SessionId: currentSessionID})
 }
 

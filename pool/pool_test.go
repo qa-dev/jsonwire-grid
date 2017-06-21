@@ -2,75 +2,13 @@ package pool
 
 import (
 	"errors"
+	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
+	"github.com/qa-dev/jsonwire-grid/pool/strategy"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
 	"time"
-	"github.com/qa-dev/jsonwire-grid/pool/strategy"
 )
-
-type StorageMock struct {
-	mock.Mock
-}
-
-func (s *StorageMock) Add(node Node) error {
-	args := s.Called(node)
-	return args.Error(0)
-}
-
-func (s *StorageMock) ReserveAvailable(caps Capabilities) (Node, error) {
-	args := s.Called(caps)
-	return args.Get(0).(Node), args.Error(1)
-}
-
-func (s *StorageMock) SetBusy(node Node, sessionId string) error {
-	args := s.Called(node, sessionId)
-	return args.Error(0)
-}
-
-func (s *StorageMock) SetAvailable(node Node) error {
-	args := s.Called(node)
-	return args.Error(0)
-}
-
-func (s *StorageMock) GetCountWithStatus(nodeStatus *NodeStatus) (int, error) {
-	args := s.Called(nodeStatus)
-	return args.Int(0), args.Error(1)
-}
-
-func (s *StorageMock) GetBySession(sessionId string) (Node, error) {
-	args := s.Called(sessionId)
-	return args.Get(0).(Node), args.Error(1)
-}
-
-func (s *StorageMock) GetByAddress(address string) (Node, error) {
-	args := s.Called(address)
-	return args.Get(0).(Node), args.Error(1)
-}
-
-func (s *StorageMock) GetAll() ([]Node, error) {
-	args := s.Called()
-	return args.Get(0).([]Node), args.Error(1)
-}
-
-func (s *StorageMock) Remove(node Node) error {
-	args := s.Called(node)
-	return args.Error(0)
-}
-
-type StrategyListMock struct {
-	mock.Mock
-}
-
-func (s *StrategyListMock) Reserve(caps Capabilities) (Node, error) {
-	args := s.Called(caps)
-	return args.Get(0).(Node), args.Error(1)
-}
-
-func (s *StrategyListMock) CleanUp(node Node) error {
-	args := s.Called(node)
-	return args.Error(0)
-}
 
 func TestNewPool(t *testing.T) {
 	a := assert.New(t)
@@ -83,9 +21,9 @@ func TestNewPool(t *testing.T) {
 func TestPool_ReserveAvailableNode_Positive(t *testing.T) {
 	a := assert.New(t)
 	s := new(StrategyListMock)
-	s.On("Reserve", mock.AnythingOfType("pool.Capabilities")).Return(Node{}, nil)
+	s.On("Reserve", mock.AnythingOfType("capabilities.Capabilities")).Return(Node{}, nil)
 	p := NewPool(new(StorageMock), s)
-	node, err := p.ReserveAvailableNode(Capabilities{})
+	node, err := p.ReserveAvailableNode(capabilities.Capabilities{})
 	a.NotNil(node)
 	a.Nil(err)
 }
@@ -94,9 +32,9 @@ func TestPool_ReserveAvailableNode_Negative(t *testing.T) {
 	a := assert.New(t)
 	eError := strategy.ErrNotFound
 	s := new(StrategyListMock)
-	s.On("Reserve", mock.AnythingOfType("pool.Capabilities")).Return(Node{}, eError)
+	s.On("Reserve", mock.AnythingOfType("capabilities.Capabilities")).Return(Node{}, eError)
 	p := NewPool(new(StorageMock), s)
-	_, err := p.ReserveAvailableNode(Capabilities{})
+	_, err := p.ReserveAvailableNode(capabilities.Capabilities{})
 	a.Error(err)
 }
 
@@ -105,11 +43,11 @@ func TestPool_ReserveAvailableNode_Negative(t *testing.T) {
 func TestPool_Add_Positive(t *testing.T) {
 	a := assert.New(t)
 	s := new(StorageMock)
-	s.On("Add", mock.AnythingOfType("pool.Node")).Return(nil)
+	s.On("Add", mock.AnythingOfType("pool.Node"), mock.AnythingOfType("int")).Return(nil)
 	p := NewPool(s, new(StrategyListMock))
 	eAddress := "127.0.0.1"
 	eNodeType := NodeTypePersistent
-	err := p.Add(eNodeType, eAddress, []Capabilities{{"browserName": "ololo"}})
+	err := p.Add(eNodeType, eAddress, []capabilities.Capabilities{{"browserName": "ololo"}})
 	a.Nil(err)
 }
 
@@ -121,7 +59,7 @@ func TestPool_Add_Negative(t *testing.T) {
 	p := NewPool(s, new(StrategyListMock))
 	eAddress := "127.0.0.1"
 	eNodeType := NodeTypePersistent
-	err := p.Add(eNodeType, eAddress, []Capabilities{})
+	err := p.Add(eNodeType, eAddress, []capabilities.Capabilities{})
 	a.Error(err)
 }
 
@@ -284,10 +222,10 @@ func TestPool_CountNodes_Negative(t *testing.T) {
 
 func TestPool_fixNodeStatus_Positive_BusyExpired(t *testing.T) {
 	a := assert.New(t)
-	s := new(StorageMock)
-	s.On("SetAvailable", mock.AnythingOfType("pool.Node")).Return(nil)
-	p := NewPool(s, new(StrategyListMock))
-	node := NewNode(NodeTypePersistent, "", NodeStatusBusy, "", 0, 0, []Capabilities{})
+	slm := new(StrategyListMock)
+	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(nil)
+	p := NewPool(new(StorageMock), slm)
+	node := NewNode(NodeTypePersistent, "", NodeStatusBusy, "", 0, 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.True(isFixed)
 	a.Nil(err)
@@ -295,10 +233,10 @@ func TestPool_fixNodeStatus_Positive_BusyExpired(t *testing.T) {
 
 func TestPool_fixNodeStatus_Positive_ReservedExpired(t *testing.T) {
 	a := assert.New(t)
-	s := new(StorageMock)
-	s.On("SetAvailable", mock.AnythingOfType("pool.Node")).Return(nil)
-	p := NewPool(s, new(StrategyListMock))
-	node := NewNode(NodeTypePersistent, "", NodeStatusReserved, "", 0, 0, []Capabilities{})
+	slm := new(StrategyListMock)
+	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(nil)
+	p := NewPool(new(StorageMock), slm)
+	node := NewNode(NodeTypePersistent, "", NodeStatusReserved, "", 0, 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.True(isFixed)
 	a.Nil(err)
@@ -306,10 +244,10 @@ func TestPool_fixNodeStatus_Positive_ReservedExpired(t *testing.T) {
 
 func TestPool_fixNodeStatus_Positive_BusyNotNotExpired(t *testing.T) {
 	a := assert.New(t)
-	s := new(StorageMock)
-	s.On("SetAvailable", mock.AnythingOfType("pool.Node")).Return(nil)
-	p := NewPool(s, new(StrategyListMock))
-	node := NewNode(NodeTypePersistent, "", NodeStatusBusy, "", time.Now().Unix(), 0, []Capabilities{})
+	slm := new(StrategyListMock)
+	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(nil)
+	p := NewPool(new(StorageMock), slm)
+	node := NewNode(NodeTypePersistent, "", NodeStatusBusy, "", time.Now().Unix(), 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.False(isFixed)
 	a.Nil(err)
@@ -317,10 +255,10 @@ func TestPool_fixNodeStatus_Positive_BusyNotNotExpired(t *testing.T) {
 
 func TestPool_fixNodeStatus_Positive_ReservedNotNotExpired(t *testing.T) {
 	a := assert.New(t)
-	s := new(StorageMock)
-	s.On("SetAvailable", mock.AnythingOfType("pool.Node")).Return(nil)
-	p := NewPool(s, new(StrategyListMock))
-	node := NewNode(NodeTypePersistent, "", NodeStatusReserved, "", time.Now().Unix(), 0, []Capabilities{})
+	slm := new(StrategyListMock)
+	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(nil)
+	p := NewPool(new(StorageMock), slm)
+	node := NewNode(NodeTypePersistent, "", NodeStatusReserved, "", time.Now().Unix(), 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.False(isFixed)
 	a.Nil(err)
@@ -328,10 +266,10 @@ func TestPool_fixNodeStatus_Positive_ReservedNotNotExpired(t *testing.T) {
 
 func TestPool_fixNodeStatus_Positive_AvailableExpired(t *testing.T) {
 	a := assert.New(t)
-	s := new(StorageMock)
-	s.On("SetAvailable", mock.AnythingOfType("pool.Node")).Return(nil)
-	p := NewPool(s, new(StrategyListMock))
-	node := NewNode(NodeTypePersistent, "", NodeStatusAvailable, "", 0, 0, []Capabilities{})
+	slm := new(StrategyListMock)
+	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(nil)
+	p := NewPool(new(StorageMock), slm)
+	node := NewNode(NodeTypePersistent, "", NodeStatusAvailable, "", 0, 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.False(isFixed)
 	a.Nil(err)
@@ -339,11 +277,11 @@ func TestPool_fixNodeStatus_Positive_AvailableExpired(t *testing.T) {
 
 func TestPool_fixNodeStatus_NegativeBusy(t *testing.T) {
 	a := assert.New(t)
-	s := new(StorageMock)
 	eError := errors.New("Error")
-	s.On("SetAvailable", mock.AnythingOfType("pool.Node")).Return(eError)
-	p := NewPool(s, new(StrategyListMock))
-	node := NewNode(NodeTypePersistent, "", NodeStatusBusy, "", 0, 0, []Capabilities{})
+	slm := new(StrategyListMock)
+	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(eError)
+	p := NewPool(new(StorageMock), slm)
+	node := NewNode(NodeTypePersistent, "", NodeStatusBusy, "", 0, 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.False(isFixed)
 	a.Error(err)
@@ -351,11 +289,11 @@ func TestPool_fixNodeStatus_NegativeBusy(t *testing.T) {
 
 func TestPool_fixNodeStatus_NegativeReserved(t *testing.T) {
 	a := assert.New(t)
-	s := new(StorageMock)
 	eError := errors.New("Error")
-	s.On("SetAvailable", mock.AnythingOfType("pool.Node")).Return(eError)
-	p := NewPool(s, new(StrategyListMock))
-	node := NewNode(NodeTypePersistent, "", NodeStatusReserved, "", 0, 0, []Capabilities{})
+	slm := new(StrategyListMock)
+	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(eError)
+	p := NewPool(new(StorageMock), slm)
+	node := NewNode(NodeTypePersistent, "", NodeStatusReserved, "", 0, 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.False(isFixed)
 	a.Error(err)

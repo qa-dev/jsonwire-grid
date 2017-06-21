@@ -16,6 +16,7 @@ type Config struct {
 }
 
 type Grid struct {
+	ClientType       string     `json:"client_type"`
 	Port             int        `json:"port"`
 	StrategyList     []Strategy `json:"strategy_list"`
 	BusyNodeDuration string     `json:"busy_node_duration"`     // duration string format ex. 12m, see time.ParseDuration()
@@ -23,16 +24,15 @@ type Grid struct {
 }
 
 type Strategy struct {
-	Config   map[string]string `json:"config"` // ex. docker config, kubernetes config, etc.
-	Type     string            `json:"type"`
-	Limit    int               `json:"limit"`
-	NodeList []Node            `json:"node_list"`
+	Params   json.RawMessage `json:"params"` // ex. docker config, kubernetes config, etc.
+	Type     string          `json:"type"`
+	Limit    int             `json:"limit"`
+	NodeList []Node          `json:"node_list"`
 }
 
 type Node struct {
-	Config       map[string]string      `json:"config"` // ex. image_name, etc.
-	Capabilities map[string]interface{} `json:"capabilities"`
-	Limit        int                    `json:"limit"`
+	Params           json.RawMessage          `json:"params"` // ex. image_name, etc.
+	CapabilitiesList []map[string]interface{} `json:"capabilities_list"`
 }
 
 type Logger struct {

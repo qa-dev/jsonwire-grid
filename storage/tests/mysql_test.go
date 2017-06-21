@@ -105,6 +105,12 @@ func TestMysqlStorage_Add_Repeat(t *testing.T) {
 
 }
 
+// TestStorage_Add_Limit_Overflow see testStorage_Add_Limit_Overflow
+func TestStorage_Add_Limit_Overflow(t *testing.T) {
+	testStorage_Add_Limit_Overflow(t, mv)
+
+}
+
 // TestMysqlStorage_GetAll see testStorage_GetAll
 func TestMysqlStorage_GetAll(t *testing.T) {
 	testStorage_GetAll(t, mv)
@@ -130,14 +136,9 @@ func TestMysqlStorage_Remove(t *testing.T) {
 	testStorage_Remove(t, mv)
 }
 
-// TestMysqlStorage_ReserveAvailable_Positive_Filtration see testStorage_ReserveAvailable_Positive_Filtration
-func TestMysqlStorage_ReserveAvailable_Positive_Filtration(t *testing.T) {
-	testStorage_ReserveAvailable_Positive_Filtration(t, mv)
-}
-
-// TestMysqlStorage_ReserveAvailable_Positive_NoFiltration see testStorage_ReserveAvailable_Positive_NoFiltration
-func TestMysqlStorage_ReserveAvailable_Positive_NoFiltration(t *testing.T) {
-	testStorage_ReserveAvailable_Positive_NoFiltration(t, mv)
+// TestMysqlStorage_ReserveAvailable_Positive see testStorage_ReserveAvailable_Positive
+func TestMysqlStorage_ReserveAvailable_Positive(t *testing.T) {
+	testStorage_ReserveAvailable_Positive(t, mv)
 }
 
 // TestMysqlStorage_ReserveAvailable_Negative see testStorage_ReserveAvailable_Negative
