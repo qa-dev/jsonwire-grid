@@ -43,7 +43,7 @@ func (c *Client) Sessions() (*jsonwire.Sessions, error) {
 func (c *Client) Status() (*jsonwire.Message, error) {
 	reqUrl := url.URL{
 		Scheme: PROTOCOL,
-		Path:   "/wd/hub/status",
+		Path:   "/status",
 		Host:   c.Address(),
 	}
 	request, err := newRequest(http.MethodGet, reqUrl.String(), "")
