@@ -23,6 +23,6 @@
 
 # Your local config
 config.json
-bindata.go
+/bindata.go
 dist/
 dbconfig.yml

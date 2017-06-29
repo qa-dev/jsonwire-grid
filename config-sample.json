@@ -7,11 +7,46 @@
       "connection": "root:@(localhost:3306)/grid?tx_isolation=SERIALIZABLE&parseTime=true&interpolateParams=true"
   },
   "grid": {
+    "client_type": "selenium",
     "port": 4444,
     "strategy_list": [
       {
-        "type": "default",
-        "limit": 0
+        "type": "persistent"
+      },
+      {
+        "type": "kubernetes",
+        "limit": 20,
+        "params": {},
+        "node_list": [
+          {
+            "params": {
+              "image":"myimage:latest",
+              "port": "5555"
+            },
+            "capabilities_list": [
+              {
+                "browserName": "firefox",
+                "browserVersion": 50
+              },
+              {
+                "browserName": "chrome",
+                "browserVersion": 150
+              }
+            ]
+          },
+          {
+            "params": {
+              "image":"myimage2:latest",
+              "port": "5555"
+            },
+            "capabilities_list": [
+              {
+                "browserName": "firefox",
+                "browserVersion": 54
+              }
+            ]
+          }
+        ]
       }
     ],
     "busy_node_duration": "15m",

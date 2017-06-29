@@ -6,17 +6,17 @@ import (
 	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 )
 
 const (
-	//todo: 2 просто чтобы пока конфликтов не было, так как старый план в том же пакете
 	defaultBusyNodeDuration     = time.Minute * 30
 	defaultReservedNodeDuration = time.Minute * 5
 )
 
 type StorageInterface interface {
-	Add(Node) error
-	ReserveAvailable(Capabilities) (Node, error)
+	Add(node Node, limit int) error
+	ReserveAvailable([]Node) (Node, error)
 	SetBusy(Node, string) error
 	SetAvailable(Node) error
 	GetCountWithStatus(*NodeStatus) (int, error)
@@ -26,14 +26,26 @@ type StorageInterface interface {
 	Remove(Node) error
 }
 
+type StrategyInterface interface {
+	Reserve(capabilities.Capabilities) (Node, error)
+	CleanUp(Node) error
+	FixNodeStatus(Node) error
+}
+
 type Pool struct {
 	storage              StorageInterface
 	busyNodeDuration     time.Duration
 	reservedNodeDuration time.Duration
+	strategyList         StrategyListInterface
 }
 
-func NewPool(storage StorageInterface) *Pool {
-	return &Pool{storage, defaultBusyNodeDuration, defaultReservedNodeDuration}
+func NewPool(storage StorageInterface, strategyList StrategyListInterface) *Pool {
+	return &Pool{
+		storage:              storage,
+		busyNodeDuration:     defaultBusyNodeDuration,
+		reservedNodeDuration: defaultReservedNodeDuration,
+		strategyList:         strategyList,
+	}
 }
 
 func (p *Pool) SetBusyNodeDuration(duration time.Duration) {
@@ -45,21 +57,22 @@ func (p *Pool) SetReservedNodeDuration(duration time.Duration) {
 }
 
 // TODO: research close transaction and defer close mysql result body.
-func (p *Pool) ReserveAvailableNode(capabilities Capabilities) (*Node, error) {
-	node, err := p.storage.ReserveAvailable(capabilities)
+func (p *Pool) ReserveAvailableNode(caps capabilities.Capabilities) (*Node, error) {
+	node, err := p.strategyList.Reserve(caps)
 	if err != nil {
 		err = errors.New("Can't reserve available node, " + err.Error())
 		log.Error(err)
+		return nil, err
 	}
 	return &node, err
 }
 
-func (p *Pool) Add(t NodeType, address string, capabilitiesList []Capabilities) error {
+func (p *Pool) Add(t NodeType, address string, capabilitiesList []capabilities.Capabilities) error {
 	if len(capabilitiesList) == 0 {
 		return errors.New("[Pool/Add] Capabilities must contains more one element")
 	}
 	ts := time.Now().Unix()
-	return p.storage.Add(*NewNode(t, address, NodeStatusAvailable, "", ts, ts, capabilitiesList))
+	return p.storage.Add(*NewNode(t, address, NodeStatusAvailable, "", ts, ts, capabilitiesList), 0)
 }
 
 func (p *Pool) RegisterSession(node *Node, sessionID string) error {
@@ -91,7 +104,7 @@ func (p *Pool) GetNodeByAddress(address string) (*Node, error) {
 }
 
 func (p *Pool) CleanUpNode(node *Node) error {
-	err := p.storage.SetAvailable(*node)
+	err := p.strategyList.CleanUp(*node)
 	if err != nil {
 		err = errors.New("Can't clean up node: " + err.Error())
 		log.Error(err)
@@ -134,7 +147,7 @@ func (p *Pool) FixNodeStatuses() {
 			continue
 		}
 		if isFixed {
-			log.Infof("Node [%s] status fixed to available", node.Address)
+			log.Infof("Node [%s] status fixed", node.Address)
 		}
 	}
 }
@@ -153,9 +166,9 @@ func (p *Pool) fixNodeStatus(node *Node) (bool, error) {
 	default:
 		return false, nil
 	}
-	err := p.storage.SetAvailable(*node)
+	err := p.strategyList.FixNodeStatus(*node)
 	if err != nil {
-		return false, errors.New(fmt.Sprintf("Can't fix node [%s] status to available, %s", node.Address, err.Error()))
+		return false, errors.New(fmt.Sprintf("Can't fix node [%s] status, %s", node.Address, err.Error()))
 	}
 	return true, nil
 }

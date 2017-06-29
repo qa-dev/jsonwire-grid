@@ -9,6 +9,7 @@ import (
 	"github.com/qa-dev/jsonwire-grid/logger"
 	"github.com/qa-dev/jsonwire-grid/middleware"
 	"github.com/qa-dev/jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	poolMetrics "github.com/qa-dev/jsonwire-grid/pool/metrics"
 	"github.com/qa-dev/jsonwire-grid/utils/metrics"
 	"net/http"
@@ -55,7 +56,28 @@ func main() {
 	if err != nil {
 		log.Fatalf("Can't create storage factory, %s", err)
 	}
-	poolInstance := pool.NewPool(storage)
+	capsComparator := capabilities.NewComparator()
+	strategyFactoryList, err := invokeStrategyFactoryList(*cfg)
+	if err != nil {
+		log.Fatalf("Can't create strategy factory list, %s", err)
+	}
+
+	clientFactory, err := createClient(*cfg)
+	if err != nil {
+		log.Fatalf("Create ClientFactory error, %s", err)
+	}
+
+	var strategyList []pool.StrategyInterface
+	for _, strategyFactory := range strategyFactoryList {
+		strategy, err := strategyFactory.Create(storage, capsComparator, clientFactory)
+		if err != nil {
+			log.Fatalf("Can't create strategy, %s", err)
+		}
+		strategyList = append(strategyList, strategy)
+	}
+
+	strategyListStruct := pool.NewStrategyList(strategyList)
+	poolInstance := pool.NewPool(storage, strategyListStruct)
 	poolInstance.SetBusyNodeDuration(busyNodeDuration)
 	poolInstance.SetReservedNodeDuration(reservedNodeDuration)
 
@@ -71,8 +93,8 @@ func main() {
 	}()
 
 	m := middleware.NewLogMiddleware(statsdClient)
-	http.Handle("/wd/hub/session", m.Log(&handlers.CreateSession{Pool: poolInstance})) //selenium
-	http.Handle("/session", m.Log(&handlers.CreateSession{Pool: poolInstance}))        //wda
+	http.Handle("/wd/hub/session", m.Log(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory})) //selenium
+	http.Handle("/session", m.Log(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory}))        //wda
 	http.Handle("/grid/register", m.Log(&handlers.RegisterNode{Pool: poolInstance}))
 	http.Handle("/grid/api/proxy", &handlers.ApiProxy{Pool: poolInstance})
 	http.HandleFunc("/_info", heartbeat)

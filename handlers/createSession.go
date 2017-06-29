@@ -7,9 +7,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"github.com/qa-dev/jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"github.com/qa-dev/jsonwire-grid/proxy"
-	"github.com/qa-dev/jsonwire-grid/selenium"
-	"github.com/qa-dev/jsonwire-grid/wda"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
@@ -17,7 +16,8 @@ import (
 )
 
 type CreateSession struct {
-	Pool *pool.Pool
+	Pool          *pool.Pool
+	ClientFactory jsonwire.ClientFactoryInterface
 }
 
 func (h *CreateSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -25,7 +25,7 @@ func (h *CreateSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	var capabilities map[string]jsonwire.Capabilities
+	var caps map[string]jsonwire.Capabilities
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		errorMessage := "Error reading request: " + err.Error()
@@ -42,21 +42,21 @@ func (h *CreateSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	rc := ioutil.NopCloser(bytes.NewReader(body))
 	r.Body = rc
 	log.Infof("requested session with params: %s", string(body))
-	err = json.Unmarshal(body, &capabilities)
+	err = json.Unmarshal(body, &caps)
 	if err != nil {
 		errorMessage := "Error unmarshal json: " + err.Error()
 		log.Error(errorMessage)
 		http.Error(rw, errorMessage, http.StatusInternalServerError)
 		return
 	}
-	desiredCapabilities, ok := capabilities["desiredCapabilities"]
+	desiredCapabilities, ok := caps["desiredCapabilities"]
 	if !ok {
 		errorMessage := "Not passed 'desiredCapabilities'"
 		log.Error(errorMessage)
 		http.Error(rw, errorMessage, http.StatusInternalServerError)
 		return
 	}
-	poolCapabilities := pool.Capabilities(desiredCapabilities)
+	poolCapabilities := capabilities.Capabilities(desiredCapabilities)
 	tw, err := h.tryCreateSession(r, &poolCapabilities)
 	if err != nil {
 		http.Error(rw, "Can't create session: "+err.Error(), http.StatusInternalServerError)
@@ -66,7 +66,7 @@ func (h *CreateSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(tw.Output)
 }
 
-func (h *CreateSession) tryCreateSession(r *http.Request, capabilities *pool.Capabilities) (*proxy.ResponseWriter, error) {
+func (h *CreateSession) tryCreateSession(r *http.Request, capabilities *capabilities.Capabilities) (*proxy.ResponseWriter, error) {
 	select {
 	case <-r.Context().Done():
 		err := errors.New("Request cancelled by client, " + r.Context().Err().Error())
@@ -79,16 +79,11 @@ func (h *CreateSession) tryCreateSession(r *http.Request, capabilities *pool.Cap
 		return nil, errors.New("reserve node error: " + err.Error())
 	}
 	//todo: посылать в мониторинг событие, если вернулся не 0
-	seleniumClient, err := createClient(node.Address, capabilities)
-	if err != nil {
-		return nil, errors.New("create Client error: " + err.Error())
-	}
+	seleniumClient := h.ClientFactory.Create(node.Address)
 	seleniumNode := jsonwire.NewNode(seleniumClient)
 	_, err = seleniumNode.RemoveAllSessions()
 	if err != nil {
-		log.Warn("Can't remove all sessions from node: " + err.Error() + ", go to next available node: " + node.String())
-		h.Pool.Remove(node)
-		return h.tryCreateSession(r, capabilities)
+		return nil, errors.New("Can't remove all sessions from node: " + err.Error() + ", go to next available node: " + node.String())
 	}
 	reverseProxy := httputil.NewSingleHostReverseProxy(&url.URL{
 		Scheme: "http",
@@ -100,23 +95,8 @@ func (h *CreateSession) tryCreateSession(r *http.Request, capabilities *pool.Cap
 	reverseProxy.ServeHTTP(tw, r)
 
 	if !transport.IsSuccess {
-		log.Warn("Failure proxy request on node " + node.String() + ": " + string(tw.Output))
-		h.Pool.Remove(node)
-		return h.tryCreateSession(r, capabilities)
+		return nil, errors.New("Failure proxy request on node " + node.String() + ": " + string(tw.Output))
 	}
 
 	return tw, nil
-}
-
-func createClient(addr string, capabilities *pool.Capabilities) (jsonwire.ClientInterface, error) {
-	if capabilities == nil {
-		return nil, errors.New("capabilities must be not nil")
-	}
-	platformName := (*capabilities)["platformName"]
-	switch platformName {
-	case "WDA":
-		return wda.NewClient(addr), nil
-	default:
-		return selenium.NewClient(addr), nil
-	}
 }

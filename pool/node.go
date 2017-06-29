@@ -1,5 +1,7 @@
 package pool
 
+import "github.com/qa-dev/jsonwire-grid/pool/capabilities"
+
 type NodeStatus string
 
 const (
@@ -11,8 +13,8 @@ const (
 type NodeType string
 
 const (
-	NodeTypeRegular   NodeType = "regular"
-	NodeTypeTemporary NodeType = "temporary"
+	NodeTypePersistent NodeType = "persistent"
+	NodeTypeKubernetes NodeType = "kubernetes"
 )
 
 type Node struct {
@@ -22,14 +24,12 @@ type Node struct {
 	SessionID        string
 	Updated          int64
 	Registered       int64
-	CapabilitiesList []Capabilities
+	CapabilitiesList []capabilities.Capabilities
 }
 
 func (n *Node) String() string {
 	return "Node [" + n.Address + "]"
 }
-
-type Capabilities map[string]interface{}
 
 func NewNode(
 	t NodeType,
@@ -38,7 +38,7 @@ func NewNode(
 	sessionID string,
 	updated int64,
 	registered int64,
-	capabilitiesList []Capabilities,
+	capabilitiesList []capabilities.Capabilities,
 ) *Node {
 	return &Node{
 		t,
