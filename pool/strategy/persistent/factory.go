@@ -13,5 +13,10 @@ func (f *StrategyFactory) Create(
 	capsComparator capabilities.ComparatorInterface,
 	clientFactory jsonwire.ClientFactoryInterface,
 ) (pool.StrategyInterface, error) {
-	return &Strategy{storage, capsComparator, clientFactory}, nil
+	return &Strategy{
+		storage,
+		capsComparator,
+		clientFactory,
+		new(nodeHelperFactory),
+	}, nil
 }

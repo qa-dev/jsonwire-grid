@@ -79,13 +79,7 @@ func (h *CreateSession) tryCreateSession(r *http.Request, capabilities *capabili
 	if err != nil {
 		return nil, errors.New("reserve node error: " + err.Error())
 	}
-	//todo: посылать в мониторинг событие, если вернулся не 0
-	seleniumClient := h.ClientFactory.Create(node.Address)
-	seleniumNode := jsonwire.NewNode(seleniumClient)
-	_, err = seleniumNode.RemoveAllSessions()
-	if err != nil {
-		return nil, errors.New("Can't remove all sessions from node: " + err.Error() + ", go to next available node: " + node.String())
-	}
+
 	reverseProxy := httputil.NewSingleHostReverseProxy(&url.URL{
 		Scheme: "http",
 		Host:   node.Address,

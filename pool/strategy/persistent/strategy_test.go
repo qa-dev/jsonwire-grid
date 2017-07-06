@@ -11,6 +11,23 @@ import (
 	"testing"
 )
 
+type sessionsRemoverMockFactory struct {
+	sessionsRemover sessionsRemover
+}
+
+func (f *sessionsRemoverMockFactory) create(abstractClient jsonwire.ClientInterface) sessionsRemover {
+	return f.sessionsRemover
+}
+
+type sessionsRemoverMock struct {
+	mock.Mock
+}
+
+func (r *sessionsRemoverMock) removeAllSessions() (int, error) {
+	args := r.Called()
+	return args.Int(0), args.Error(1)
+}
+
 func TestStrategy_Reserve_Positive(t *testing.T) {
 	sm := new(pool.StorageMock)
 	expectedNode := pool.Node{CapabilitiesList: []capabilities.Capabilities{{"cap1": "cal1"}}}
@@ -24,7 +41,10 @@ func TestStrategy_Reserve_Positive(t *testing.T) {
 	cfm.On("Create", mock.AnythingOfType("string")).Return(clm)
 	message := new(jsonwire.Message)
 	clm.On("Status").Return(message, nil)
-	s := Strategy{storage: sm, capsComparator: cm, clientFactory: cfm}
+	srm := new(sessionsRemoverMock)
+	srm.On("removeAllSessions").Return(0, nil)
+	srfm := &sessionsRemoverMockFactory{srm}
+	s := Strategy{storage: sm, capsComparator: cm, clientFactory: cfm, sessionsRemoverFactory: srfm}
 	node, err := s.Reserve(capabilities.Capabilities{})
 	assert.Nil(t, err)
 	assert.Equal(t, expectedNode, node)
@@ -91,6 +111,27 @@ func TestStrategy_Reserve_Negative_Client_Status_NotOk(t *testing.T) {
 	message.Status = -99
 	clm.On("Status").Return(message, nil)
 	s := Strategy{storage: sm, capsComparator: cm, clientFactory: cfm}
+	_, err := s.Reserve(capabilities.Capabilities{})
+	assert.NotNil(t, err)
+}
+
+func TestStrategy_Reserve_Negative_removeAllSessions_Error(t *testing.T) {
+	sm := new(pool.StorageMock)
+	sm.On("GetAll").Return([]pool.Node{{}}, nil)
+	cm := new(capabilities.ComparatorMock)
+	cm.On("Compare", mock.AnythingOfType("capabilities.Capabilities"), mock.AnythingOfType("capabilities.Capabilities")).Return(true)
+	expectedNode := pool.Node{CapabilitiesList: []capabilities.Capabilities{{"cap1": "cal1"}}}
+	sm.On("ReserveAvailable", mock.AnythingOfType("[]pool.Node")).Return([]pool.Node{expectedNode}, nil)
+	cfm := new(jsonwire.ClientFactoryMock)
+	clm := new(jsonwire.ClientMock)
+	cfm.On("Create", mock.AnythingOfType("string")).Return(clm)
+	message := new(jsonwire.Message)
+	clm.On("Status").Return(message, nil)
+	eError := errors.New("Error")
+	srm := new(sessionsRemoverMock)
+	srm.On("removeAllSessions").Return(0, eError)
+	srfm := &sessionsRemoverMockFactory{srm}
+	s := Strategy{storage: sm, capsComparator: cm, clientFactory: cfm, sessionsRemoverFactory: srfm}
 	_, err := s.Reserve(capabilities.Capabilities{})
 	assert.NotNil(t, err)
 }
