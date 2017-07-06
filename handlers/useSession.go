@@ -16,22 +16,17 @@ type UseSession struct {
 
 func (h *UseSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	re := regexp.MustCompile(".*/session/([^/]+)(?:/([^/]+))?")
-	parsedUrl := re.FindStringSubmatch(r.URL.Path)
-	if len(parsedUrl) != 3 {
+	parsedURL := re.FindStringSubmatch(r.URL.Path)
+	if len(parsedURL) != 3 {
 		errorMessage := "url [" + r.URL.Path + "] parsing error"
 		log.Infof(errorMessage)
 		http.Error(rw, errorMessage, http.StatusBadRequest)
 		return
 	}
-	sessionId := re.FindStringSubmatch(r.URL.Path)[1]
-	targetNode, err := h.Pool.GetNodeBySessionId(sessionId)
-	if targetNode == nil || err != nil {
-		errorMessage := ""
-		if err != nil {
-			errorMessage = err.Error()
-		}
-		// посылаем сообщение о том что сессия не найдена
-		errorMessage = "session " + sessionId + " not found in node pool: " + errorMessage
+	sessionID := re.FindStringSubmatch(r.URL.Path)[1]
+	targetNode, err := h.Pool.GetNodeBySessionID(sessionID)
+	if err != nil {
+		errorMessage := "session " + sessionID + " not found in node pool: " + err.Error()
 		log.Infof(errorMessage)
 		http.Error(rw, errorMessage, http.StatusNotFound)
 		return
@@ -44,7 +39,7 @@ func (h *UseSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	proxy.ServeHTTP(rw, r)
 
 	//// todo: заговнокодим пока не появилось понимание как лучше сделать ибо сраный rest
-	if parsedUrl[2] == "" && r.Method == http.MethodDelete {
+	if parsedURL[2] == "" && r.Method == http.MethodDelete {
 		err := h.Pool.CleanUpNode(targetNode)
 		if err != nil {
 			log.Error("Clanup node status error: " + err.Error())

@@ -40,10 +40,10 @@ func NewMysqlStorage(db *sqlx.DB) *MysqlStorage {
 func (s *MysqlStorage) Add(node pool.Node, limit int) error {
 	tx, err := s.db.Beginx()
 	if err != nil {
-		err = errors.New("[MysqlStorage/Add] Can't start transaction: " + err.Error())
+		err = errors.New("[MysqlStorage/Add] start transaction: " + err.Error())
 		return err
 	}
-	//todo: black magic, but it works
+	// black magic, but it works
 	result, err := tx.NamedExec(
 		"INSERT INTO node (type, address, status, sessionId, updated, registred) "+
 			"SELECT :type, :address, :status, :sessionId, :updated, :registred "+
@@ -61,30 +61,26 @@ func (s *MysqlStorage) Add(node pool.Node, limit int) error {
 			"limit":     limit,
 		},
 	)
+	if err != nil {
+		_ = tx.Rollback()
+		return errors.New("[MysqlStorage/Add] insert entry in `node` table, " + err.Error())
+	}
 
 	countAffectedRows, err := result.RowsAffected()
 	if err != nil {
-		tx.Rollback()
-		err = errors.New("[MysqlStorage/Add] Can't get affected rows, " + err.Error())
-		return err
+		_ = tx.Rollback()
+		return errors.New("[MysqlStorage/Add] get affected rows, " + err.Error())
 	}
 
 	if countAffectedRows == 0 {
-		tx.Rollback()
-		err = errors.New("[MysqlStorage/Add] No rows was affected (may be limit reached)")
-		return err
+		_ = tx.Rollback()
+		return errors.New("[MysqlStorage/Add] No rows was affected (may be limit reached)")
 	}
 
-	if err != nil {
-		tx.Rollback()
-		err = errors.New("[MysqlStorage/Add] Can't insert new node: " + err.Error())
-		return err
-	}
 	_, err = tx.Exec("DELETE FROM capabilities WHERE nodeAddress = ?", node.Address)
 	if err != nil {
-		tx.Rollback()
-		err = errors.New("[MysqlStorage/Add] Can't delete old capabilities: " + err.Error())
-		return err
+		_ = tx.Rollback()
+		return errors.New("[MysqlStorage/Add] delete old capabilities: " + err.Error())
 	}
 	var preparedCapabilities []map[string]interface{}
 	var preparedCapability map[string]interface{}
@@ -107,26 +103,23 @@ func (s *MysqlStorage) Add(node pool.Node, limit int) error {
 			preparedCapability,
 		)
 		if err != nil {
-			tx.Rollback()
-			err = errors.New("[MysqlStorage/Add] Can't insert new capabilities: " + err.Error())
-			return err
+			_ = tx.Rollback()
+			return errors.New("[MysqlStorage/Add] insert new capabilities: " + err.Error())
 
 		}
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		err = errors.New("[MysqlStorage/Add] Can't commit transaction: " + err.Error())
-		return err
+		return errors.New("[MysqlStorage/Add] commit transaction: " + err.Error())
 	}
-	return err
+	return nil
 }
 
-func (s *MysqlStorage) ReserveAvailable(nodeList []pool.Node) (node pool.Node, err error) {
+func (s *MysqlStorage) ReserveAvailable(nodeList []pool.Node) (pool.Node, error) {
 	tx, err := s.db.Beginx()
 	if err != nil {
-		err = errors.New("[MysqlStorage/ReserveAvailable] Can't start transaction: " + err.Error())
-		return
+		return pool.Node{}, errors.New("[MysqlStorage/ReserveAvailable] start transaction: " + err.Error())
 	}
 
 	nodeAddressList := make([]string, 0, len(nodeList))
@@ -139,8 +132,7 @@ func (s *MysqlStorage) ReserveAvailable(nodeList []pool.Node) (node pool.Node, e
 	query, args, err := sqlx.In(
 		"SELECT n.* FROM node n WHERE n.status = ? AND n.address IN (?) ORDER BY n.updated ASC LIMIT 1 FOR UPDATE;", args...)
 	if err != nil {
-		err = errors.New("[MysqlStorage/ReserveAvailable] Can't make select query: " + err.Error())
-		return
+		return pool.Node{}, errors.New("[MysqlStorage/ReserveAvailable] make select query: " + err.Error())
 	}
 	row := tx.QueryRowx(query, args...)
 
@@ -148,15 +140,13 @@ func (s *MysqlStorage) ReserveAvailable(nodeList []pool.Node) (node pool.Node, e
 	err = row.StructScan(nodeModel)
 
 	if err == sql.ErrNoRows {
-		tx.Rollback()
-		err = storage.ErrNotFound
-		return
+		_ = tx.Rollback()
+		return pool.Node{}, storage.ErrNotFound
 	}
 
 	if err != nil {
-		tx.Rollback()
-		err = errors.New("[MysqlStorage/ReserveAvailable] Can't select node: " + err.Error())
-		return
+		_ = tx.Rollback()
+		return pool.Node{}, errors.New("[MysqlStorage/ReserveAvailable] select node: " + err.Error())
 	}
 
 	nodeModel.Updated = time.Now().Unix()
@@ -168,51 +158,46 @@ func (s *MysqlStorage) ReserveAvailable(nodeList []pool.Node) (node pool.Node, e
 		nodeModel.Address,
 	)
 	if err != nil {
-		tx.Rollback()
-		err = errors.New("[MysqlStorage/ReserveAvailable] Can't update status: " + err.Error())
-		return
+		_ = tx.Rollback()
+		return pool.Node{}, errors.New("[MysqlStorage/ReserveAvailable] update table `node`: " + err.Error())
 	}
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
-		tx.Rollback()
-		err = errors.New("[MysqlStorage/ReserveAvailable] Can't update status: " + err.Error())
-		return
+		_ = tx.Rollback()
+		return pool.Node{}, errors.New("[MysqlStorage/ReserveAvailable] get affected rows: " + err.Error())
 	}
 	if rowsAffected == 0 {
-		tx.Rollback()
-		err = errors.New("[MysqlStorage/ReserveAvailable] Can't update status: affected 0 rows")
-		return
+		_ = tx.Rollback()
+		return pool.Node{}, errors.New("[MysqlStorage/ReserveAvailable] affected 0 rows")
 	}
 	err = tx.Commit()
 	if err != nil {
-		err = errors.New("[MysqlStorage/ReserveAvailable] Can't commit transaction: " + err.Error())
-		return
+		return pool.Node{}, errors.New("[MysqlStorage/ReserveAvailable] commit transaction: " + err.Error())
+
 	}
-	node = *mapper(nodeModel)
-	return
+
+	return *mapper(nodeModel), nil
 }
 
-func (s *MysqlStorage) SetBusy(node pool.Node, sessionId string) error {
+func (s *MysqlStorage) SetBusy(node pool.Node, sessionID string) error {
 	res, err := s.db.Exec(
-		"UPDATE node SET sessionId = ?, updated = ?, status = ? WHERE address = ?",
-		sessionId,
+		"UPDATE node SET sessionID = ?, updated = ?, status = ? WHERE address = ?",
+		sessionID,
 		time.Now().Unix(),
 		string(pool.NodeStatusBusy),
 		node.Address,
 	)
 	if err != nil {
-		err = errors.New("[MysqlStorage/SetBusy] Can't update status: " + err.Error())
-		return err
+		return errors.New("[MysqlStorage/SetBusy] update table `node`, " + err.Error())
 	}
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
-		err = errors.New("[MysqlStorage/SetBusy] Can't update status: " + err.Error())
-		return err
+		return errors.New("[MysqlStorage/SetBusy] get affected rows, " + err.Error())
 	}
 	if rowsAffected == 0 {
-		err = errors.New("[MysqlStorage/SetBusy] Can't update status: affected 0 rows")
+		return errors.New("[MysqlStorage/SetBusy] affected 0 rows")
 	}
-	return err
+	return nil
 }
 
 func (s *MysqlStorage) SetAvailable(node pool.Node) error {
@@ -223,18 +208,18 @@ func (s *MysqlStorage) SetAvailable(node pool.Node) error {
 		node.Address,
 	)
 	if err != nil {
-		err = errors.New("[MysqlStorage/SetAvailable] Can't update status: " + err.Error())
+		err = errors.New("[MysqlStorage/SetAvailable] update table `node`, " + err.Error())
 		return err
 	}
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
-		err = errors.New("[MysqlStorage/SetAvailable] Can't update status: " + err.Error())
+		err = errors.New("[MysqlStorage/SetAvailable] get affected rows, " + err.Error())
 		return err
 	}
 	if rowsAffected == 0 {
-		err = errors.New("[MysqlStorage/SetAvailable] Can't update status: affected 0 rows")
+		return errors.New("[MysqlStorage/SetAvailable] affected 0 rows")
 	}
-	return err
+	return nil
 }
 
 func (s *MysqlStorage) GetCountWithStatus(status *pool.NodeStatus) (int, error) {
@@ -250,18 +235,18 @@ func (s *MysqlStorage) GetCountWithStatus(status *pool.NodeStatus) (int, error) 
 			Scan(&count)
 	}
 	if err != nil {
-		err = errors.New("[MysqlStorage/GetCountWithStatus] " + err.Error())
+		return 0, errors.New("[MysqlStorage/GetCountWithStatus] select from table `node`, " + err.Error())
 	}
-	return count, err
+	return count, nil
 }
 
-func (s *MysqlStorage) GetBySession(sessionId string) (pool.Node, error) {
+func (s *MysqlStorage) GetBySession(sessionID string) (pool.Node, error) {
 	node := new(MysqlNodeModel)
-	err := s.db.QueryRowx("SELECT * FROM node WHERE sessionId = ?", sessionId).StructScan(node)
+	err := s.db.QueryRowx("SELECT * FROM node WHERE sessionID = ?", sessionID).StructScan(node)
 	if err != nil {
-		err = errors.New("[MysqlStorage/GetBySession] " + err.Error())
+		return pool.Node{}, errors.New("[MysqlStorage/GetBySession] select from table `node`," + err.Error())
 	}
-	return *mapper(node), err
+	return *mapper(node), nil
 }
 
 func (s *MysqlStorage) GetByAddress(address string) (pool.Node, error) {
@@ -269,25 +254,23 @@ func (s *MysqlStorage) GetByAddress(address string) (pool.Node, error) {
 	queryString := "SELECT * FROM node WHERE address = ?"
 	err := s.db.QueryRowx(queryString, address).StructScan(node)
 	if err != nil {
-		err = errors.New("[MysqlStorage/GetByAddress] " + err.Error())
+		return pool.Node{}, errors.New("[MysqlStorage/GetByAddress] select from table `node`," + err.Error())
 	}
-	return *mapper(node), err
+	return *mapper(node), nil
 }
 
 func (s *MysqlStorage) GetAll() ([]pool.Node, error) {
 	nodeList := make([]pool.Node, 0)
 	rows, err := s.db.Queryx("SELECT * FROM node")
 	if err != nil {
-		err = errors.New("[MysqlStorage/GetAll] Select error: " + err.Error())
-		return nil, err
+		return nil, errors.New("[MysqlStorage/GetAll] select from table `node`," + err.Error())
 	}
 	defer rows.Close()
 	for rows.Next() {
 		node := new(MysqlNodeModel)
 		err := rows.StructScan(node)
 		if err != nil {
-			err = errors.New("[MysqlStorage/GetAll] Error on iteration: " + err.Error())
-			return nil, err
+			return nil, errors.New("[MysqlStorage/GetAll] iterate result rows" + err.Error())
 		}
 		nodeList = append(nodeList, *mapper(node))
 	}
@@ -296,8 +279,7 @@ func (s *MysqlStorage) GetAll() ([]pool.Node, error) {
 	capsMap := map[string]map[string]capabilities.Capabilities{}
 	err = s.db.Select(&rowsCaps, "SELECT * FROM capabilities")
 	if err != nil {
-		err = errors.New("[MysqlStorage/GetAll] Can't get all capabilities from db, " + err.Error())
-		return nil, err
+		return nil, errors.New("[MysqlStorage/GetAll] get all capabilities from db, " + err.Error())
 	}
 	for _, row := range rowsCaps {
 		_, ok := capsMap[row.NodeAddress]
@@ -320,39 +302,33 @@ func (s *MysqlStorage) GetAll() ([]pool.Node, error) {
 		nodeList[i].CapabilitiesList = capsList
 	}
 
-	return nodeList, err
+	return nodeList, nil
 }
 
 func (s *MysqlStorage) Remove(node pool.Node) error {
 	res, err := s.db.Exec("DELETE FROM node WHERE address = ?", node.Address)
 	if err != nil {
-		err = errors.New("[MysqlStorage/Remove] Can't delete from node: " + err.Error())
-		return err
+		return errors.New("[MysqlStorage/Remove] delete from table `node`, " + err.Error())
 	}
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
-		err = errors.New("[MysqlStorage/Remove] Can't delete from node: " + err.Error())
-		return err
+		return errors.New("[MysqlStorage/Remove] delete from node: get affected rows," + err.Error())
 	}
 	if rowsAffected == 0 {
-		err = errors.New("[MysqlStorage/Remove] Can't delete from node: affected 0 rows")
-		return err
+		return errors.New("[MysqlStorage/Remove] delete from node: affected 0 rows")
 	}
 	res, err = s.db.Exec("DELETE FROM capabilities WHERE nodeAddress = ?", node.Address)
 	if err != nil {
-		err = errors.New("[MysqlStorage/Remove] Can't delete from capabilities: " + err.Error())
-		return err
+		return errors.New("[MysqlStorage/Remove] delete from table `capabilities`: " + err.Error())
 	}
 	rowsAffected, err = res.RowsAffected()
 	if err != nil {
-		err = errors.New("[MysqlStorage/Remove] Can't delete from capabilities: " + err.Error())
-		return err
+		return errors.New("[MysqlStorage/Remove] delete from capabilities: " + err.Error())
 	}
 	if rowsAffected == 0 {
-		err = errors.New("[MysqlStorage/Remove] Can't delete from capabilities: affected 0 rows")
-		return err
+		return errors.New("[MysqlStorage/Remove] delete from capabilities: affected 0 rows")
 	}
-	return err
+	return nil
 }
 
 func mapper(model *MysqlNodeModel) *pool.Node {
@@ -363,7 +339,7 @@ func mapper(model *MysqlNodeModel) *pool.Node {
 		model.SessionID,
 		model.Updated,
 		model.Registered,
-		[]capabilities.Capabilities{}, //todo: заглушка для capabilities, так как пока мапить это не надо
+		[]capabilities.Capabilities{}, //todo: stub, temporary
 	)
 	return node
 }

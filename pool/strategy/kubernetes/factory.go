@@ -19,7 +19,7 @@ func (f *StrategyFactory) Create(
 	capsComparator capabilities.ComparatorInterface,
 	clientFactory jsonwire.ClientFactoryInterface,
 ) (pool.StrategyInterface, error) {
-	strategyConfig, err := NewConfig(f.Config)
+	strategyConfig, err := newConfig(f.Config)
 	if err != nil {
 		return nil, errors.New("convert strategy config to k8s format, " + err.Error())
 	}

@@ -141,12 +141,12 @@ func createSession() (sessionID string, err error) {
 		return
 	}
 	switch {
-	case message.SessionId != "":
-		sessionID = message.SessionId
-	case message.Value.SessionId != "":
-		sessionID = message.Value.SessionId
+	case message.SessionID != "":
+		sessionID = message.SessionID
+	case message.Value.SessionID != "":
+		sessionID = message.Value.SessionID
 	default:
-		err = errors.New("Field`s SessionId is empty")
+		err = errors.New("Field`s SessionID is empty")
 		return
 	}
 	if resp.StatusCode != http.StatusOK {

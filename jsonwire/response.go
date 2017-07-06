@@ -8,21 +8,21 @@ import (
 type ResponseStatus int
 
 const (
-	RESPONSE_STATUS_SUCCESS     ResponseStatus = 0
-	RESPONSE_STATUS_UNKNOWN_ERR ResponseStatus = 13
+	ResponseStatusSuccess    ResponseStatus = 0
+	ResponseStatusUnknownErr ResponseStatus = 13
 )
 
 type Response struct {
-	SessionId *string         `json:"sessionId"`
+	SessionID *string         `json:"sessionId"`
 	Status    ResponseStatus  `json:"status"`
 	Value     json.RawMessage `json:"value"`
 }
 
-func NewResponse(sessionId *string, status ResponseStatus, value json.RawMessage) *Response {
-	return &Response{sessionId, status, value}
+func NewResponse(sessionID *string, status ResponseStatus, value json.RawMessage) *Response {
+	return &Response{sessionID, status, value}
 }
 
-func JsonResponse(w http.ResponseWriter, data Response, code int) (int, error) {
+func JSONResponse(w http.ResponseWriter, data Response, code int) (int, error) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 

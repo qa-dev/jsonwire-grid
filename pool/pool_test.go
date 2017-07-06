@@ -116,7 +116,7 @@ func TestPool_GetNodeBySessionId_Positive(t *testing.T) {
 	s := new(StorageMock)
 	s.On("GetBySession", mock.AnythingOfType("string")).Return(Node{}, nil)
 	p := NewPool(s, new(StrategyListMock))
-	node, err := p.GetNodeBySessionId("testSessId")
+	node, err := p.GetNodeBySessionID("testSessId")
 	a.NotNil(node)
 	a.Nil(err)
 }
@@ -127,7 +127,7 @@ func TestPool_GetNodeBySessionId_Negative(t *testing.T) {
 	eError := errors.New("Error")
 	s.On("GetBySession", mock.AnythingOfType("string")).Return(Node{}, eError)
 	p := NewPool(s, new(StrategyListMock))
-	node, err := p.GetNodeBySessionId("testSessId")
+	node, err := p.GetNodeBySessionID("testSessId")
 	a.Nil(node)
 	a.Error(err)
 }

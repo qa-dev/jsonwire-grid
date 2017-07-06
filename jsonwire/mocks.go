@@ -27,8 +27,8 @@ func (c *ClientMock) Sessions() (*Sessions, error) {
 	return args.Get(0).(*Sessions), args.Error(1)
 }
 
-func (c *ClientMock) CloseSession(sessionId string) (*Message, error) {
-	args := c.Called(sessionId)
+func (c *ClientMock) CloseSession(sessionID string) (*Message, error) {
+	args := c.Called(sessionID)
 	return args.Get(0).(*Message), args.Error(1)
 }
 

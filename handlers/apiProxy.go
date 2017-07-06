@@ -8,15 +8,15 @@ import (
 	"github.com/qa-dev/jsonwire-grid/pool"
 )
 
-type ApiProxy struct {
+type APIProxy struct {
 	Pool *pool.Pool
 }
 
-func (h *ApiProxy) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (h *APIProxy) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("Content-type", "application/json")
 
 	id := r.URL.Query().Get("id")
-	nodeUrl, err := url.Parse(id) //todo: обработка ошибок
+	nodeURL, err := url.Parse(id) //todo: обработка ошибок
 
 	if err != nil {
 		errorMessage := "Error get 'id' from url: " + r.URL.String()
@@ -25,17 +25,17 @@ func (h *ApiProxy) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	node, err := h.Pool.GetNodeByAddress(nodeUrl.Host)
+	_, err = h.Pool.GetNodeByAddress(nodeURL.Host)
 
 	//todo: хардкод для ткста, сделать нормальный респонз обжекты
-	if node == nil || err != nil {
-		errorMessage := "api/proxy: Can't get node"
-		if err != nil {
-			errorMessage = err.Error()
-			log.Warning(errorMessage)
-		}
-		rw.Write([]byte(`{"msg": "Cannot find proxy with ID =` + id + ` in the registry: ` + errorMessage + `", "success": false}`))
+	if err != nil {
+		errorMessage := "api/proxy: Can't get node, " + err.Error()
+		log.Warning(errorMessage)
+		_, err = rw.Write([]byte(`{"msg": "Cannot find proxy with ID =` + id + ` in the registry: ` + errorMessage + `", "success": false}`))
 	} else {
-		rw.Write([]byte(`{"id": "", "request": {}, "msg": "proxy found !", "success": true}`))
+		_, err = rw.Write([]byte(`{"id": "", "request": {}, "msg": "proxy found !", "success": true}`))
+	}
+	if err != nil {
+		log.Errorf("api/proxy: write response, %v", err)
 	}
 }

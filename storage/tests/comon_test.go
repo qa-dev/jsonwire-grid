@@ -62,6 +62,7 @@ func testStorage_Add_Repeat(t *testing.T, p PrepareInterface) {
 	err = storage.Add(node, 0)
 	assert.Nil(t, err)
 	nodeList, err := storage.GetAll()
+	assert.Nil(t, err)
 	assert.Len(t, nodeList, 1, "Added more than one node")
 	assert.Equal(t, node.SessionID, nodeList[0].SessionID, "SessionId not updated")
 	//todo: доделать capabilities
@@ -84,6 +85,7 @@ func testStorage_Add_Limit_Overflow(t *testing.T, p PrepareInterface) {
 	err = storage.Add(node, limit)
 	assert.NotNil(t, err)
 	nodeList, err := storage.GetAll()
+	assert.Nil(t, err)
 	assert.Len(t, nodeList, limit, "Added more than "+strconv.Itoa(limit)+"one node")
 }
 

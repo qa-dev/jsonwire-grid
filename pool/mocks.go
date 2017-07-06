@@ -19,8 +19,8 @@ func (s *StorageMock) ReserveAvailable(nodeList []Node) (Node, error) {
 	return args.Get(0).(Node), args.Error(1)
 }
 
-func (s *StorageMock) SetBusy(node Node, sessionId string) error {
-	args := s.Called(node, sessionId)
+func (s *StorageMock) SetBusy(node Node, sessionID string) error {
+	args := s.Called(node, sessionID)
 	return args.Error(0)
 }
 
@@ -34,8 +34,8 @@ func (s *StorageMock) GetCountWithStatus(nodeStatus *NodeStatus) (int, error) {
 	return args.Int(0), args.Error(1)
 }
 
-func (s *StorageMock) GetBySession(sessionId string) (Node, error) {
-	args := s.Called(sessionId)
+func (s *StorageMock) GetBySession(sessionID string) (Node, error) {
+	args := s.Called(sessionID)
 	return args.Get(0).(Node), args.Error(1)
 }
 

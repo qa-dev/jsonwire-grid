@@ -83,10 +83,10 @@ func (p *Pool) GetAll() ([]Node, error) {
 	return p.storage.GetAll()
 }
 
-func (p *Pool) GetNodeBySessionId(sessionId string) (*Node, error) {
-	node, err := p.storage.GetBySession(sessionId)
+func (p *Pool) GetNodeBySessionID(sessionID string) (*Node, error) {
+	node, err := p.storage.GetBySession(sessionID)
 	if err != nil {
-		err = errors.New(fmt.Sprintf("Can't find node by session[%s], %s", sessionId, err.Error()))
+		err = fmt.Errorf("Can't find node by session[%s], %s", sessionID, err.Error())
 		log.Error(err)
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (p *Pool) GetNodeBySessionId(sessionId string) (*Node, error) {
 func (p *Pool) GetNodeByAddress(address string) (*Node, error) {
 	node, err := p.storage.GetByAddress(address)
 	if err != nil {
-		err = errors.New(fmt.Sprintf("Can't find node by address[%s], %s", address, err.Error()))
+		err = fmt.Errorf("Can't find node by address[%s], %s", address, err.Error())
 		log.Error(err)
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func (p *Pool) FixNodeStatuses() {
 }
 
 func (p *Pool) fixNodeStatus(node *Node) (bool, error) {
-	nodeStatusDuration := time.Since(time.Unix(int64(node.Updated), 0))
+	nodeStatusDuration := time.Since(time.Unix(node.Updated, 0))
 	switch node.Status {
 	case NodeStatusReserved:
 		if nodeStatusDuration < p.reservedNodeDuration {
@@ -168,7 +168,7 @@ func (p *Pool) fixNodeStatus(node *Node) (bool, error) {
 	}
 	err := p.strategyList.FixNodeStatus(*node)
 	if err != nil {
-		return false, errors.New(fmt.Sprintf("Can't fix node [%s] status, %s", node.Address, err.Error()))
+		return false, fmt.Errorf("Can't fix node [%s] status, %s", node.Address, err.Error())
 	}
 	return true, nil
 }

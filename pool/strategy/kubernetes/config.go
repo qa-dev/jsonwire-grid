@@ -25,7 +25,7 @@ type nodeParams struct {
 	Port  string `json:"port"`
 }
 
-func NewConfig(cfg config.Strategy) (*strategyConfig, error) {
+func newConfig(cfg config.Strategy) (*strategyConfig, error) {
 	kubConfig := new(strategyConfig)
 	kubConfig.Type = cfg.Type
 	kubConfig.Limit = cfg.Limit

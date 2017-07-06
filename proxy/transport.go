@@ -27,47 +27,38 @@ func NewCreateSessionTransport(pool *pool.Pool, node *pool.Node) *CreateSessionT
 func (t *CreateSessionTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 	response, err := http.DefaultTransport.RoundTrip(request)
 	if err != nil {
-		err = errors.New("Can't round trip to node: " + err.Error())
-		return nil, err
+		return nil, errors.New("round trip to node: " + err.Error())
 	}
 
-	// small quantity ebamistic-magic
 	b, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		err = errors.New("Can't read node response: " + err.Error())
-		return nil, err
+		return nil, errors.New("read node response: " + err.Error())
 	}
 	err = response.Body.Close()
 	if err != nil {
-		return nil, err
+		return nil, errors.New("close response body: " + err.Error())
 	}
-	body := ioutil.NopCloser(bytes.NewReader(b))
-	response.Body = body
 
 	var message jsonwire.NewSession
 	err = json.Unmarshal(b, &message)
 	if err != nil {
-		response.Body.Close()
-		err = errors.New("Cant read sessionID: " + err.Error())
-		return nil, err
+		return nil, errors.New("read body with sessionID: " + err.Error())
 	}
 	var sessionID string
 	switch {
-	case message.SessionId != "":
-		sessionID = message.SessionId
-	case message.Value.SessionId != "":
-		sessionID = message.Value.SessionId
+	case message.SessionID != "":
+		sessionID = message.SessionID
+	case message.Value.SessionID != "":
+		sessionID = message.Value.SessionID
 	default:
-		response.Body.Close()
-		return nil, errors.New(fmt.Sprintf("Session not created, response: %s", string(b)))
+		return nil, fmt.Errorf("session not created, response: %s", string(b))
 	}
 	log.Infof("register SessionID: %s on node %s", sessionID, t.node.Address)
 	err = t.pool.RegisterSession(t.node, sessionID)
 	if err != nil {
-		response.Body.Close()
-		log.Errorf("sessionId not registred in storage: %s", sessionID)
-		return nil, err
+		return nil, fmt.Errorf("sessionId not registred in storage: %s", sessionID)
 	}
+	response.Body = ioutil.NopCloser(bytes.NewReader(b))
 	t.IsSuccess = true
 	return response, err
 }

@@ -5,7 +5,7 @@ import (
 )
 
 type Message struct {
-	SessionId string      `json:"sessionId"`
+	SessionID string      `json:"sessionId"`
 	Status    int         `json:"status"`
 	Value     interface{} `json:"value"`
 }
@@ -13,14 +13,14 @@ type Message struct {
 type NewSession struct {
 	Message
 	Value struct {
-		SessionId string `json:"sessionId"`
+		SessionID string `json:"sessionId"`
 	} `json:"value"`
 }
 
 type Sessions struct {
 	Message
 	Value []struct {
-		Id           string          `json:"id"`
+		ID           string          `json:"id"`
 		Capabilities json.RawMessage `json:"capabilities"`
 	} `json:"value"`
 }
@@ -44,12 +44,12 @@ type Configuration struct {
 	HubHost          string
 	RegisterCycle    int
 	HubPort          int
-	Url              string
+	URL              string
 	Register         bool
 	CapabilitiesList []Capabilities `json:"capabilities"` // selenium 2
 }
 
-type ApiProxy struct {
+type APIProxy struct {
 	ID      string      `json:"id"`
 	Request interface{} `json:"request"` //todo: пока не ясно зачем он нужен
 	Msg     string      `json:"msg"`

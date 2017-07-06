@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
@@ -134,39 +133,33 @@ func sendApiProxy() error {
 	b := strings.NewReader("{}")
 	req, err := http.NewRequest(http.MethodPost, hubUrl+"/grid/api/proxy?id=http://"+host+":"+strconv.Itoa(port), b)
 	if err != nil {
-		err = errors.New(fmt.Sprintf("create request error, %s", err))
-		return err
+		return fmt.Errorf("create request error, %s", err)
 	}
 	req.Header.Add("Content-Type", "application/json;charset=utf-8")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Accept-charset", "utf-8")
 	err = req.Body.Close()
 	if err != nil {
-		err = errors.New(fmt.Sprintf("close request body error, %s", err))
-		return err
+		return fmt.Errorf("close request body error, %s", err)
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		err = errors.New(fmt.Sprintf("send request error, %s", err))
-		return err
+		return fmt.Errorf("send request error, %s", err)
 	}
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		err = errors.New(fmt.Sprintf("read response body error, %s", err))
-		return err
+		return fmt.Errorf("read response body error, %s", err)
 	}
-	var respStruct jsonwire.ApiProxy
+	var respStruct jsonwire.APIProxy
 	err = json.Unmarshal(respBytes, &respStruct)
 	if err != nil {
-		err = errors.New(fmt.Sprintf("decode json, %s", err))
-		return err
+		return fmt.Errorf("decode json, %s", err)
 	}
 	err = resp.Body.Close()
 	if err != nil {
-		err = errors.New(fmt.Sprintf("close response body error, %s", err))
-		return err
+		return fmt.Errorf("close response body error, %s", err)
 	}
 	if !respStruct.Success {
 		log.Info("Node not registered on hub")

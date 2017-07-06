@@ -24,7 +24,10 @@ func (h *RegisterNode) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, errorMessage, http.StatusInternalServerError)
 		return
 	}
-	r.Body.Close()
+	err = r.Body.Close()
+	if err != nil {
+		log.Errorf("register/node: close request body, %v", err)
+	}
 	var register jsonwire.Register
 	err = json.Unmarshal(body, &register)
 	if err != nil {
@@ -59,5 +62,8 @@ func (h *RegisterNode) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	rw.WriteHeader(http.StatusOK)
-	rw.Write([]byte("ok"))
+	_, err = rw.Write([]byte("ok"))
+	if err != nil {
+		log.Errorf("register/node: write response, %v", err)
+	}
 }

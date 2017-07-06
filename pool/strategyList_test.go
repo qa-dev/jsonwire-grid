@@ -10,20 +10,6 @@ import (
 	"time"
 )
 
-type StrategyMock struct {
-	mock.Mock
-}
-
-func (s *StrategyMock) Reserve(caps capabilities.Capabilities) (Node, error) {
-	args := s.Called(caps)
-	return args.Get(0).(Node), args.Error(1)
-}
-
-func (s *StrategyMock) CleanUp(node Node) error {
-	args := s.Called(node)
-	return args.Error(0)
-}
-
 func TestNewStrategyList(t *testing.T) {
 	a := assert.New(t)
 	p := NewStrategyList([]StrategyInterface{})

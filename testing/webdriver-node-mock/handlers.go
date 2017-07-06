@@ -20,7 +20,7 @@ func status(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		err = errors.New("Get sessions error, " + err.Error())
 		log.Error(err)
-		json.NewEncoder(rw).Encode(&jsonwire.Message{Value: err.Error(), Status: int(jsonwire.RESPONSE_STATUS_UNKNOWN_ERR)})
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -29,10 +29,10 @@ func getSessions(rw http.ResponseWriter, r *http.Request) {
 	sessions := &jsonwire.Sessions{}
 	if currentSessionID != "" {
 		sessions.Value = []struct {
-			Id           string          `json:"id"`
+			ID           string          `json:"id"`
 			Capabilities json.RawMessage `json:"capabilities"`
 		}{
-			{Id: currentSessionID, Capabilities: nil},
+			{ID: currentSessionID, Capabilities: nil},
 		}
 	}
 
@@ -40,7 +40,7 @@ func getSessions(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		err = errors.New("Get sessions error, " + err.Error())
 		log.Error(err)
-		json.NewEncoder(rw).Encode(&jsonwire.Message{Value: err.Error(), Status: int(jsonwire.RESPONSE_STATUS_UNKNOWN_ERR)})
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -57,18 +57,24 @@ func createSession(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	if currentSessionID != "" {
+
+	responseMessage := new(jsonwire.Message)
+	switch {
+	case currentSessionID != "": // trying create session on busy node
 		errorMassage := "Session already exists"
 		log.Error(errorMassage)
 		rw.WriteHeader(http.StatusInternalServerError)
-		responseMessage := &jsonwire.Message{}
-		responseMessage.Status = int(jsonwire.RESPONSE_STATUS_UNKNOWN_ERR)
+		responseMessage.Status = int(jsonwire.ResponseStatusUnknownErr)
 		responseMessage.Value = errorMassage
-		json.NewEncoder(rw).Encode(responseMessage)
-		return
+	default:
+		currentSessionID = uuid.NewV4().String()
+		responseMessage.SessionID = currentSessionID
 	}
-	currentSessionID = uuid.NewV4().String()
-	json.NewEncoder(rw).Encode(&jsonwire.Message{SessionId: currentSessionID})
+
+	err := json.NewEncoder(rw).Encode(responseMessage)
+	if err != nil {
+		http.Error(rw, "Error encode response to json, rawMessage: "+fmt.Sprintf("%+v", responseMessage), http.StatusInternalServerError)
+	}
 }
 
 // useSession mocks any action as open page, click, close session
@@ -89,18 +95,21 @@ func useSession(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sessionId := re.FindStringSubmatch(r.URL.Path)[1]
-	responseMessage := &jsonwire.Message{SessionId: sessionId}
-	if sessionId != currentSessionID {
+	responseMessage := &jsonwire.Message{SessionID: sessionId}
+
+	switch {
+	case sessionId != currentSessionID: // client requested unknown session id
 		errorMassage := fmt.Sprintf("sessionID '%s' not found", sessionId)
 		log.Error(errorMassage)
 		rw.WriteHeader(http.StatusNotFound)
-		responseMessage.Status = int(jsonwire.RESPONSE_STATUS_UNKNOWN_ERR)
+		responseMessage.Status = int(jsonwire.ResponseStatusUnknownErr)
 		responseMessage.Value = errorMassage
-		json.NewEncoder(rw).Encode(responseMessage)
-		return
-	}
-	if parsedUrl[2] == "" && r.Method == http.MethodDelete {
+	case parsedUrl[2] == "" && r.Method == http.MethodDelete: // session closed by client
 		currentSessionID = ""
 	}
-	json.NewEncoder(rw).Encode(responseMessage)
+
+	err := json.NewEncoder(rw).Encode(responseMessage)
+	if err != nil {
+		http.Error(rw, "Error encode response to json, rawMessage: "+fmt.Sprintf("%+v", responseMessage), http.StatusInternalServerError)
+	}
 }

@@ -35,9 +35,7 @@ func (h *CreateSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 	err = r.Body.Close()
 	if err != nil {
-		log.Error(err.Error())
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		log.Errorf("create/session: close request body, %v", err)
 	}
 	rc := ioutil.NopCloser(bytes.NewReader(body))
 	r.Body = rc
@@ -63,7 +61,10 @@ func (h *CreateSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rw.WriteHeader(tw.StatusCode)
-	rw.Write(tw.Output)
+	_, err = rw.Write(tw.Output)
+	if err != nil {
+		log.Errorf("create/session: write response, %v", err)
+	}
 }
 
 func (h *CreateSession) tryCreateSession(r *http.Request, capabilities *capabilities.Capabilities) (*proxy.ResponseWriter, error) {

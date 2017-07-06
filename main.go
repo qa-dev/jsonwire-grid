@@ -81,14 +81,13 @@ func main() {
 	poolInstance.SetBusyNodeDuration(busyNodeDuration)
 	poolInstance.SetReservedNodeDuration(reservedNodeDuration)
 
-	//todo: сделать конфиг для пула, вынести duration туда
-	poolMetricsSender := poolMetrics.NewSender(statsdClient, poolInstance, time.Second*1) //todo: вынести в конфиг
+	poolMetricsSender := poolMetrics.NewSender(statsdClient, poolInstance, time.Second*1) // todo: move to config
 	go poolMetricsSender.SendAll()
 
 	go func() {
 		for {
 			poolInstance.FixNodeStatuses()
-			time.Sleep(time.Minute * 5) // todo: вынести в конфиг
+			time.Sleep(time.Minute * 5) // todo: move to config
 		}
 	}()
 
@@ -96,7 +95,7 @@ func main() {
 	http.Handle("/wd/hub/session", m.Log(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory})) //selenium
 	http.Handle("/session", m.Log(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory}))        //wda
 	http.Handle("/grid/register", m.Log(&handlers.RegisterNode{Pool: poolInstance}))
-	http.Handle("/grid/api/proxy", &handlers.ApiProxy{Pool: poolInstance})
+	http.Handle("/grid/api/proxy", &handlers.APIProxy{Pool: poolInstance})
 	http.HandleFunc("/_info", heartbeat)
 	http.Handle("/", m.Log(&handlers.UseSession{Pool: poolInstance}))
 
@@ -118,9 +117,12 @@ func main() {
 
 	log.Info("Shutting down the server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute) // todo: вынести в конфиг
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute) // todo: move to config
 	defer cancel()
-	server.Shutdown(ctx)
+	err = server.Shutdown(ctx)
+	if err != nil {
+		log.Fatalf("graceful shutdown, %v", err)
+	}
 
 	log.Info("Server gracefully stopped")
 }
@@ -128,5 +130,8 @@ func main() {
 func heartbeat(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"result": {"ok": true}}`))
+	_, err := w.Write([]byte(`{"result": {"ok": true}}`))
+	if err != nil {
+		log.Errorf("write response, %v", err)
+	}
 }

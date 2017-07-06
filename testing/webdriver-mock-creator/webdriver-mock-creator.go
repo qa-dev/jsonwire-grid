@@ -49,8 +49,17 @@ func main() {
 
 		//wait interrupt child process
 		defer func(cmd *exec.Cmd) {
-			cmd.Process.Signal(os.Interrupt)
-			cmd.Process.Wait()
+			err := cmd.Process.Signal(os.Interrupt)
+			if err != nil {
+				log.Errorf("send interrupt mock command, %v", err)
+			}
+			_, err = cmd.Process.Wait()
+			if err == nil {
+				return
+			}
+			log.Errorf("wait interrupt mock, %v", err)
+			err = cmd.Process.Kill()
+			log.Errorf("send interrupt mock command, %v", err)
 		}(cmd)
 		log.Info("Created instance #", port-*startPort+1)
 	}
