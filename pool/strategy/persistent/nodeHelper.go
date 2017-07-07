@@ -1,18 +1,21 @@
-package jsonwire
+package persistent
 
 import (
 	"fmt"
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
 )
 
-type Node struct {
-	client ClientInterface
+type nodeHelperFactory struct{}
+
+func (f *nodeHelperFactory) create(abstractClient jsonwire.ClientInterface) sessionsRemover {
+	return &nodeHelper{client: abstractClient}
 }
 
-func NewNode(abstractClient ClientInterface) *Node {
-	return &Node{client: abstractClient}
+type nodeHelper struct {
+	client jsonwire.ClientInterface
 }
 
-func (n *Node) RemoveAllSessions() (int, error) {
+func (n *nodeHelper) removeAllSessions() (int, error) {
 	message, err := n.client.Sessions()
 	if err != nil {
 		return 0, fmt.Errorf("Can't get sessions, %s", err.Error())

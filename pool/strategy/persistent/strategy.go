@@ -9,10 +9,19 @@ import (
 	"github.com/qa-dev/jsonwire-grid/pool/strategy"
 )
 
+type sessionsRemoverFactory interface {
+	create(abstractClient jsonwire.ClientInterface) sessionsRemover
+}
+
+type sessionsRemover interface {
+	removeAllSessions() (int, error)
+}
+
 type Strategy struct {
-	storage        pool.StorageInterface
-	capsComparator capabilities.ComparatorInterface
-	clientFactory  jsonwire.ClientFactoryInterface
+	storage                pool.StorageInterface
+	capsComparator         capabilities.ComparatorInterface
+	clientFactory          jsonwire.ClientFactoryInterface
+	sessionsRemoverFactory sessionsRemoverFactory
 }
 
 func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, error) {
@@ -43,10 +52,20 @@ func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, er
 			}
 			continue
 		}
+
 		//todo: заменить магические числа на константы статусов
-		if message.Status == 0 { // status == ok
-			return node, nil
+		if message.Status != 0 { // status != ok
+			continue
 		}
+
+		seleniumNode := s.sessionsRemoverFactory.create(client)
+		//todo: посылать в мониторинг событие, если вернулся не 0
+		_, err = seleniumNode.removeAllSessions()
+		if err != nil {
+			return pool.Node{}, errors.New("remove all existing sessions from node, " + err.Error())
+		}
+
+		return node, nil
 	}
 
 	return pool.Node{}, strategy.ErrNotFound
