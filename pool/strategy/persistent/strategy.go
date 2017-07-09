@@ -62,7 +62,8 @@ func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, er
 		//todo: посылать в мониторинг событие, если вернулся не 0
 		_, err = seleniumNode.removeAllSessions()
 		if err != nil {
-			return pool.Node{}, errors.New("remove all existing sessions from node, " + err.Error())
+			log.Warningf("remove all existing sessions from node [%v], [%v]", node, err)
+			continue
 		}
 
 		return node, nil
