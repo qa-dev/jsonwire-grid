@@ -16,12 +16,15 @@ func (h *APIProxy) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("Content-type", "application/json")
 
 	id := r.URL.Query().Get("id")
-	nodeURL, err := url.Parse(id) //todo: обработка ошибок
+	nodeURL, err := url.Parse(id)
 
 	if err != nil {
 		errorMessage := "Error get 'id' from url: " + r.URL.String()
 		log.Warning(errorMessage)
-		rw.Write([]byte(`{"id": "", "request": {}, "msg": "` + errorMessage + `": false}`))
+		_, err = rw.Write([]byte(`{"id": "", "request": {}, "msg": "` + errorMessage + `": false}`))
+		if err != nil {
+			log.Errorf("api/proxy: write response, %v", err)
+		}
 		return
 	}
 
@@ -35,6 +38,7 @@ func (h *APIProxy) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	} else {
 		_, err = rw.Write([]byte(`{"id": "", "request": {}, "msg": "proxy found !", "success": true}`))
 	}
+
 	if err != nil {
 		log.Errorf("api/proxy: write response, %v", err)
 	}
