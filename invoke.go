@@ -11,6 +11,7 @@ import (
 	"github.com/qa-dev/jsonwire-grid/pool/strategy/kubernetes"
 	"github.com/qa-dev/jsonwire-grid/pool/strategy/persistent"
 	"github.com/qa-dev/jsonwire-grid/selenium"
+	"github.com/qa-dev/jsonwire-grid/storage/local"
 	"github.com/qa-dev/jsonwire-grid/storage/mysql"
 	"github.com/qa-dev/jsonwire-grid/wda"
 )
@@ -27,6 +28,8 @@ func invokeStorageFactory(config config.Config) (factory StorageFactoryInterface
 	switch config.DB.Implementation {
 	case "mysql":
 		factory = new(mysql.Factory)
+	case "local":
+		factory = new(local.Factory)
 	default:
 		err = errors.New("Invalid config, unknown param [db.implementation=" + config.DB.Implementation + "]")
 	}

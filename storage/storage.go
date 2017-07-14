@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	ErrNotFound = errors.New("storage: not found available nodes")
+	ErrNotFound = errors.New("storage: node not found ")
 )

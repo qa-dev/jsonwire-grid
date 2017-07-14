@@ -1,12 +1,12 @@
 package persistent
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"encoding/json"
-	"github.com/stretchr/testify/mock"
 	"errors"
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"testing"
 )
 
 func TestNodeHelperFactory_create(t *testing.T) {
@@ -93,4 +93,3 @@ func TestNodeHelper_removeAllSessions_Negative_CloseSession_MessageStatusNotOk(t
 	_, err := nodeHelper.removeAllSessions()
 	assert.NotNil(t, err)
 }
-
