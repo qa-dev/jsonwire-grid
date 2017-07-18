@@ -4,4 +4,8 @@ build:
     - darwin
     - linux
 hooks:
-    pre: make prepare
+  pre: make prepare
+archive:
+  files:
+    - config-local-sample.json
+    - README.md

@@ -1,6 +1,6 @@
 {
   "logger": {
-    "level": 6
+    "level": "debug"
   },
   "db": {
       "implementation": "mysql",

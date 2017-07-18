@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	// todo: сейчас не используются, совсем удалить или сделать дефолтные параметры для конфига.
 	defaultBusyNodeDuration     = time.Minute * 30
 	defaultReservedNodeDuration = time.Minute * 5
 )

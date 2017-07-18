@@ -1,6 +1,6 @@
 {
   "logger": {
-    "level": 3
+    "level": "warning"
   },
   "db": {
       "implementation": "mysql",
