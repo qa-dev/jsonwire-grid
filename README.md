@@ -1,6 +1,6 @@
 # ~~jsonwire-grid~~WebDriverGrid [![Build Status](https://travis-ci.org/qa-dev/jsonwire-grid.svg?branch=master)](https://travis-ci.org/qa-dev/jsonwire-grid)
 This is high-performance scalable implementation of Selenium Grid (hub),
-> ######What is Selenium-Grid?
+###### What is Selenium-Grid?
 >Selenium-Grid allows you run your tests on different machines against different browsers in parallel. That is, running multiple tests at the same time against different machines running different browsers and operating systems. Essentially, Selenium-Grid support distributed test execution. It allows for running your tests in a distributed test execution environment.
 
 ## Features
@@ -31,47 +31,89 @@ This is high-performance scalable implementation of Selenium Grid (hub),
 
 
 ## Configuration
+Configurations are stored in json files. Example:
+```
+{
+  "logger": {
+    "level": "debug"
+  },
+  "db": {
+    "implementation": "local"
+  },
+  "grid": {
+    "client_type": "selenium",
+    "port": 4444,
+    "strategy_list": [
+      {
+        "type": "persistent"
+      }
+    ],
+    "busy_node_duration": "15m",
+    "reserved_node_duration": "5m"
+  }
+}
+```
+
 ### Logger - Configuration of logger.
-##### `logger.level` - Support `debug`, `info`, `warning` or `error`.
+| Option        | Possible values                     | Description            | 
+| ------------- | ----------------------------------- | ---------------------- |
+| logger.level  | `debug`, `info`, `warning`, `error` | Logging level.         |
 
 ### DB - Configuration of storage.
-##### `db.implementation` - Select your favorite db, or local storage.
-Now support's: `mysql`, `local`.
+| Option            | Possible values  | Description                                |
+| ----------------- | ---------------  | ------------------------------------------ |
+| db.implementation | `mysql`, `local` | Select your favorite db, or local storage. |
+| db.connection     | see next table   | DSN for your db.                           |
+
 >Note: Note: Local (in-memory) storage does not support common session storage between grid-instances.
-##### `db.connection` - DSN for your db
-* `mysql` - example `db_user:db_pass@(db_host:3306)/db_name?parseTime=true` (parseTime=true - required option)
-* `local` - omit this property, because every instance have its own in-memory storage
+
+| DB implementation | DSN format                                                                                                                                                              |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| mysql             | [spec](https://github.com/go-sql-driver/mysql#dsn-data-source-name), example `db_user:db_pass@(db_host:3306)/db_name?parseTime=true` (parseTime=true - required option) |
+| local             | omit this property, because every instance have its own in-memory storage                                                                                               |
 
 ### Statsd - Configuration of metrics.
-##### `statsd.host` - Host of statsd server.
-##### `statsd.port` - Host of statsd server `int`.
-##### `statsd.protocol` - Network protocol.
-##### `statsd.prefix` - Prefix of metrics tag.
-##### `statsd.enable` - Enable metrics `true/false`.
+| Option          | Possible values | Description            |
+| --------------- | --------------- | ---------------------- |
+| statsd.host     | `string`        | Host of statsd server. |
+| statsd.port     | `int`           | Port of statsd server. |
+| statsd.protocol | `string`        | Network protocol.      |
+| statsd.prefix   | `string`        | Prefix of metrics tag. |
+| statsd.enable   | `bool`          | Enable metric.         |
 
 ### Grid - Configuration of app.
-##### `grid.client_type` - Type of used nodes.
-* `selenium` - [http://www.seleniumhq.org/]()
-* `wda` - [agent](https://github.com/qa-dev/WebDriverAgent) for [WDA](https://github.com/qa-dev/WebDriverAgent)
-##### `grid.port` - grid will run on this port.
-##### `grid.busy_node_duration` - max session lifetime, when timeout was elapsed grid will kill the session.
-##### `grid.reserved_node_duration` - max timeout between send request `POST /session` and opening the browser window. (Deprecated will renamed)
-##### `grid.strategy_list` - list of strategies, if grid not able create session on first strategy it go to next, until list ends. [Read more about strategies.](#strategy-list)
+| Option                      | Possible values          | Description                                                                                                                                                    |
+| --------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| grid.client_type            | `selenium`, `wda`        | Type of used nodes.                                                                                                                                            |
+| grid.port                   | `int`                    | Grid will run on this port.                                                                                                                                    |
+| grid.busy_node_duration     | `string` as `12m`, `60s` | Max session lifetime, when timeout was elapsed grid will kill the session.                                                                                     |
+| grid.reserved_node_duration | `string` as `12m`, `60s` | Max timeout between send request `POST /session` and opening the browser window. (Deprecated will renamed)                                                     |
+| grid.strategy_list          | `array`                  | List of strategies, if grid not able create session on first strategy it go to next, until list ends. [Read more about strategies.](#element-of-strategy-list) |
 
-### Strategy list
-##### `type` - [type of strategy.](#types-of-strategies)
-##### `limit` - max count of active nodes on this strategy. Unlimited if equals `0`. Dependent on strategy [type](#types-of-strategies)
-##### `params` - object describes available nodes `ex. docker config, kubernetes config, etc.`. Dependent on strategy [type](#types-of-strategies)
-##### `node_list` - list of objects describing available nodes.
-##### `node_list.[].params` - list of objects describing available nodes `ex. image_name, etc.`. Dependent on strategy [type](#types-of-strategies)
-##### `node_list.[].capabilities_list` - array of available capabilities objects. `ex. [{"foo: "bar"}, {"foo: "baz", "ololo": "trololo"}]`
+> * `selenium` - [http://www.seleniumhq.org/]()
+> * `wda` - [agent](https://github.com/qa-dev/WebDriverAgent) for [WDA](https://github.com/qa-dev/WebDriverAgent)
+
+### Element of strategy list
+| Option                         | Possible values                                                 | Description                                                                  |
+| ------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| type                           | `string`, see [type of strategy.](#types-of-strategy)           | Host of statsd server.                                                       |
+| limit                          | `int`, unlimited if equals `0`                                  | Max count of active nodes on this strategy.                                  |
+| params                         | `object`, dependent on [strategy type](#types-of-strategy)      | Object describes available nodes, ex. docker config, kubernetes config, etc. |
+| node_list                      | `array`, dependent on [strategy type](#types-of-strategy)       | Array of objects describing available nodes.                                 |
+| node_list.[].params            | `object`, dependent on [strategy type](#types-of-strategy)      | Object of describing node, ex. image_name, etc.                              |
+| node_list.[].capabilities_list | `array`, ex. [{"foo: "bar"}, {"foo: "baz", "ololo": "trololo"}] | array of objects describes available capabilities .                          |       
 
 ### Types of strategy
 ##### `persistent` - using externally started nodes, same as original selenium grid.
-* `limit` - omit this property, its always equals `0`.
-* `node_list` - omit this property.
-##### `kubernetes` - on-demand nodes in kubernetes cluster.
-* `params` - omit this property.
-* `node_list.[].params.image` - docker image with selenium.
-* `node_list.[].params.port` - port of selenium.
+| Strategy option | Possible values | Description                                          |
+|---------------- | --------------- | ---------------------------------------------------- |
+| limit           | -               | Omit this property, сount of nodes always unlimited. |
+| params          | -               | Omit this property.                                  |
+| node_list       | -               | Omit this property.                                  |
 
+##### `kubernetes` - on-demand nodes in kubernetes cluster.
+| Strategy option           | Possible values | Description                 |
+|-------------------------- | --------------- | --------------------------- |
+| params                    | -               | Omit this property.         |
+| node_list.[].params.image | -               | Docker image with selenium. |
+| node_list.[].params.port  | -               | Port of selenium.           |
