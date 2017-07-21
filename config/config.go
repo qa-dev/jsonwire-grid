@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	"github.com/Sirupsen/logrus"
 	log "github.com/Sirupsen/logrus"
 	"os"
 )
@@ -20,6 +19,7 @@ type Grid struct {
 	Port             int        `json:"port"`
 	StrategyList     []Strategy `json:"strategy_list"`
 	BusyNodeDuration string     `json:"busy_node_duration"`     // duration string format ex. 12m, see time.ParseDuration()
+	// todo: выпилить и сделать равным дедлайну http запроса
 	ReservedDuration string     `json:"reserved_node_duration"` // duration string format ex. 12m, see time.ParseDuration()
 }
 
@@ -36,7 +36,7 @@ type Node struct {
 }
 
 type Logger struct {
-	Level logrus.Level `json:"level"`
+	Level string `json:"level"`
 }
 
 type DB struct {

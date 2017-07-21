@@ -21,6 +21,12 @@ func (f *Factory) Create(config config.Config) (pool.StorageInterface, error) {
 		return nil, err
 	}
 
+	err = db.Ping()
+	if err != nil {
+		err = errors.New("Database connection not establish: " + err.Error())
+		return nil, err
+	}
+
 	db.SetMaxIdleConns(0)  // this is the root problem! set it to 0 to remove all idle connections
 	db.SetMaxOpenConns(10) // or whatever is appropriate for your setup.
 

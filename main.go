@@ -27,7 +27,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Problem in loading config from file, %s", err)
 	}
-	logger.Init(cfg.Logger)
+	err = logger.Init(cfg.Logger)
+	if err != nil {
+		log.Fatalf("Problem in init logger, %s", err)
+	}
 
 	statsdClient, err := metrics.NewStatsd(
 		cfg.Statsd.Host,
