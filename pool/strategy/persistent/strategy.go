@@ -43,7 +43,7 @@ func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, er
 			break
 		}
 		client := s.clientFactory.Create(node.Address)
-		message, err := client.Status()
+		message, err := client.Health()
 		if err != nil {
 			log.Infof("Remove unavailable node [%s], %s", node, err)
 			err = s.storage.Remove(node)
