@@ -40,7 +40,7 @@ func TestStrategy_Reserve_Positive(t *testing.T) {
 	clm := new(jsonwire.ClientMock)
 	cfm.On("Create", mock.AnythingOfType("string")).Return(clm)
 	message := new(jsonwire.Message)
-	clm.On("Status").Return(message, nil)
+	clm.On("Health").Return(message, nil)
 	srm := new(sessionsRemoverMock)
 	srm.On("removeAllSessions").Return(0, nil)
 	srfm := &sessionsRemoverMockFactory{srm}
@@ -91,7 +91,7 @@ func TestStrategy_Reserve_Negative_Client_Status_Error(t *testing.T) {
 	clm := new(jsonwire.ClientMock)
 	cfm.On("Create", mock.AnythingOfType("string")).Return(clm)
 	eError := errors.New("Error")
-	clm.On("Status").Return(nil, eError)
+	clm.On("Health").Return(nil, eError)
 	s := Strategy{storage: sm, capsComparator: cm, clientFactory: cfm}
 	_, err := s.Reserve(capabilities.Capabilities{})
 	assert.NotNil(t, err)
@@ -109,7 +109,7 @@ func TestStrategy_Reserve_Negative_Client_Status_NotOk(t *testing.T) {
 	cfm.On("Create", mock.AnythingOfType("string")).Return(clm)
 	message := new(jsonwire.Message)
 	message.Status = -99
-	clm.On("Status").Return(message, nil)
+	clm.On("Health").Return(message, nil)
 	s := Strategy{storage: sm, capsComparator: cm, clientFactory: cfm}
 	_, err := s.Reserve(capabilities.Capabilities{})
 	assert.NotNil(t, err)
@@ -126,7 +126,7 @@ func TestStrategy_Reserve_Negative_removeAllSessions_Error(t *testing.T) {
 	clm := new(jsonwire.ClientMock)
 	cfm.On("Create", mock.AnythingOfType("string")).Return(clm)
 	message := new(jsonwire.Message)
-	clm.On("Status").Return(message, nil)
+	clm.On("Health").Return(message, nil)
 	eError := errors.New("Error")
 	srm := new(sessionsRemoverMock)
 	srm.On("removeAllSessions").Return(0, eError)
