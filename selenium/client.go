@@ -53,7 +53,7 @@ func (c *Client) Sessions() (*jsonwire.Sessions, error) {
 	return &sessions, err
 }
 
-func (c *Client) Status() (*jsonwire.Message, error) {
+func (c *Client) Health() (*jsonwire.Message, error) {
 	reqURL := url.URL{
 		Scheme: PROTOCOL,
 		Path:   "/wd/hub/status",

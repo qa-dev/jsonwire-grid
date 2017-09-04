@@ -17,7 +17,7 @@ type ClientMock struct {
 	mock.Mock
 }
 
-func (c *ClientMock) Status() (*Message, error) {
+func (c *ClientMock) Health() (*Message, error) {
 	args := c.Called()
 	return args.Get(0).(*Message), args.Error(1)
 }

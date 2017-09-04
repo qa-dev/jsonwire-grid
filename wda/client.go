@@ -40,10 +40,10 @@ func (c *Client) Sessions() (*jsonwire.Sessions, error) {
 	return &sessions, nil
 }
 
-func (c *Client) Status() (*jsonwire.Message, error) {
+func (c *Client) Health() (*jsonwire.Message, error) {
 	reqURL := url.URL{
 		Scheme: PROTOCOL,
-		Path:   "/status",
+		Path:   "/health",
 		Host:   c.Address(),
 	}
 	request, err := newRequest(http.MethodGet, reqURL.String(), "")

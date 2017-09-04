@@ -63,7 +63,7 @@ Loop:
 		default:
 			time.Sleep(time.Second)
 			log.Debugln("start request")
-			message, err := client.Status()
+			message, err := client.Health()
 			if err != nil {
 				log.Debugf("fail request, %v", err)
 				continue

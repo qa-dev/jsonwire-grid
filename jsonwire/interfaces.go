@@ -5,7 +5,7 @@ type ClientFactoryInterface interface {
 }
 
 type ClientInterface interface {
-	Status() (*Message, error)
+	Health() (*Message, error)
 	Sessions() (*Sessions, error)
 	CloseSession(sessionID string) (*Message, error)
 	Address() string
