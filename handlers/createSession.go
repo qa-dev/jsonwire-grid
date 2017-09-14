@@ -90,6 +90,10 @@ func (h *CreateSession) tryCreateSession(r *http.Request, capabilities *capabili
 	reverseProxy.ServeHTTP(tw, r)
 
 	if !transport.IsSuccess {
+		err = h.Pool.CleanUpNode(node)
+		if err != nil {
+			log.Errorf("fail cleanUp node on create session failure, %s", err)
+		}
 		return nil, errors.New("Failure proxy request on node " + node.String() + ": " + string(tw.Output))
 	}
 
