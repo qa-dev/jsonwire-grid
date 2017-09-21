@@ -18,6 +18,7 @@ type CreateSessionTransport struct {
 	pool      *pool.Pool
 	node      *pool.Node
 	IsSuccess bool
+	Error     error
 }
 
 func NewCreateSessionTransport(pool *pool.Pool, node *pool.Node) *CreateSessionTransport {
@@ -25,6 +26,8 @@ func NewCreateSessionTransport(pool *pool.Pool, node *pool.Node) *CreateSessionT
 }
 
 func (t *CreateSessionTransport) RoundTrip(request *http.Request) (*http.Response, error) {
+	var err error
+	defer func() {t.Error = err}() // dirty hack, for get error from round trip
 	response, err := http.DefaultTransport.RoundTrip(request)
 	if err != nil {
 		return nil, errors.New("round trip to node: " + err.Error())
