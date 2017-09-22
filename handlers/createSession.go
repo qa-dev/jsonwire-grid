@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"fmt"
 )
 
 type CreateSession struct {
@@ -94,7 +95,7 @@ func (h *CreateSession) tryCreateSession(r *http.Request, capabilities *capabili
 		if err != nil {
 			log.Errorf("fail cleanUp node on create session failure, %s", err)
 		}
-		return nil, errors.New("Failure proxy request on node " + node.String() + ": " + string(tw.Output))
+		return nil, fmt.Errorf("failure proxy request on node %s: %s msg: %s", node, tw.Output, transport.Error)
 	}
 
 	return tw, nil
