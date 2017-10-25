@@ -18,9 +18,9 @@ type Grid struct {
 	ClientType       string     `json:"client_type"`
 	Port             int        `json:"port"`
 	StrategyList     []Strategy `json:"strategy_list"`
-	BusyNodeDuration string     `json:"busy_node_duration"`     // duration string format ex. 12m, see time.ParseDuration()
+	BusyNodeDuration string     `json:"busy_node_duration"` // duration string format ex. 12m, see time.ParseDuration()
 	// todo: выпилить и сделать равным дедлайну http запроса
-	ReservedDuration string     `json:"reserved_node_duration"` // duration string format ex. 12m, see time.ParseDuration()
+	ReservedDuration string `json:"reserved_node_duration"` // duration string format ex. 12m, see time.ParseDuration()
 }
 
 type Strategy struct {

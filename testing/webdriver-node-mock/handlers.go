@@ -51,6 +51,7 @@ func createSession(rw http.ResponseWriter, r *http.Request) {
 		time.Sleep(time.Millisecond * time.Duration(rand.Intn(maxDuration)))
 	}
 	rw.Header().Set("Accept", "application/json")
+	rw.Header().Set("Content-type", "application/json; charset=utf-8")
 	rw.Header().Set("Accept-charset", "utf-8")
 
 	if r.Method != http.MethodPost {
@@ -106,10 +107,21 @@ func useSession(rw http.ResponseWriter, r *http.Request) {
 		responseMessage.Value = errorMassage
 	case parsedUrl[2] == "" && r.Method == http.MethodDelete: // session closed by client
 		currentSessionID = ""
+	default:
+		responseMessage.Value = RandStringRunes(10000)
 	}
-
 	err := json.NewEncoder(rw).Encode(responseMessage)
 	if err != nil {
 		http.Error(rw, "Error encode response to json, rawMessage: "+fmt.Sprintf("%+v", responseMessage), http.StatusInternalServerError)
 	}
+}
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func RandStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }

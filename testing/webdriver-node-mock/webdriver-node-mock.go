@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-var currentSessionID, host, hubUrl string
+var currentSessionID, host, hubUrl, id string
 var maxDuration, port int
 
 func main() {
@@ -38,6 +38,7 @@ func main() {
 	log.Infof("port: %v", port)
 	log.Infof("maxDuration: %v", maxDuration)
 
+	id = "http://" + host + ":" + strconv.Itoa(port)
 	register()
 
 	go func() {
@@ -82,8 +83,11 @@ func getIpv4() (string, error) {
 func register() {
 	log.Info("Try register")
 	register := jsonwire.Register{
-		Configuration:    &jsonwire.Configuration{Host: host, Port: port},
-		CapabilitiesList: []jsonwire.Capabilities{{"browserName": "firefox"}},
+		Configuration: &jsonwire.Configuration{
+			Id:               id,
+			Host:             host,
+			Port:             port,
+			CapabilitiesList: []jsonwire.Capabilities{{"browserName": "firefox"}}},
 	}
 	b, err := json.Marshal(register)
 	if err != nil {
@@ -130,8 +134,8 @@ func register() {
 
 // sendApiProxy check "is server know me" and register if server return false
 func sendApiProxy() error {
-	b := strings.NewReader("{}")
-	req, err := http.NewRequest(http.MethodPost, hubUrl+"/grid/api/proxy?id=http://"+host+":"+strconv.Itoa(port), b)
+	b := strings.NewReader(`{id:"` + id + `"}`)
+	req, err := http.NewRequest(http.MethodPost, hubUrl+"/grid/api/proxy?id="+id, b)
 	if err != nil {
 		return fmt.Errorf("create request error, %s", err)
 	}
@@ -163,6 +167,7 @@ func sendApiProxy() error {
 	}
 	if !respStruct.Success {
 		log.Info("Node not registered on hub")
+		log.Info(string(respBytes))
 		register()
 	}
 	return nil

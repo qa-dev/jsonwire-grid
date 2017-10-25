@@ -26,27 +26,28 @@ type Sessions struct {
 }
 
 type Register struct {
-	Class            string         `json:"class"`
-	Configuration    *Configuration `json:"configuration"`
-	CapabilitiesList []Capabilities `json:"capabilities"` // selenium 3
+	Class            string         `json:"class,omitempty"`
+	Configuration    *Configuration `json:"configuration,omitempty"`
+	CapabilitiesList []Capabilities `json:"capabilities,omitempty"` // selenium 3
 }
 
 type Capabilities map[string]interface{}
 
 type Configuration struct {
-	Proxy            string
-	Role             string
-	Hub              string
-	Port             int
-	RemoteHost       string
-	Host             string
-	MaxSession       int
-	HubHost          string
-	RegisterCycle    int
-	HubPort          int
-	URL              string
-	Register         bool
-	CapabilitiesList []Capabilities `json:"capabilities"` // selenium 2
+	Id               string         `json:"id,omitempty"`
+	Proxy            string         `json:"proxy,omitempty"`
+	Role             string         `json:"role,omitempty"`
+	Hub              string         `json:"hub,omitempty"`
+	Port             int            `json:"port,omitempty"`
+	RemoteHost       string         `json:"remoteHost,omitempty"`
+	Host             string         `json:"host,omitempty"`
+	MaxSession       int            `json:"maxSession,omitempty"`
+	HubHost          string         `json:"hubHost,omitempty"`
+	RegisterCycle    int            `json:"registerCycle,omitempty"`
+	HubPort          int            `json:"hubPort,omitempty"`
+	URL              string         `json:"url,omitempty"`
+	Register         bool           `json:"register,omitempty"`
+	CapabilitiesList []Capabilities `json:"capabilities,omitempty"` // selenium 2
 }
 
 type APIProxy struct {
