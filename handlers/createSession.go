@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"github.com/qa-dev/jsonwire-grid/pool"
@@ -13,7 +14,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"fmt"
 )
 
 type CreateSession struct {
