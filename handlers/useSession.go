@@ -11,7 +11,8 @@ import (
 )
 
 type UseSession struct {
-	Pool *pool.Pool
+	Pool  *pool.Pool
+	Cache *pool.Cache
 }
 
 func (h *UseSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -24,12 +25,17 @@ func (h *UseSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sessionID := re.FindStringSubmatch(r.URL.Path)[1]
-	targetNode, err := h.Pool.GetNodeBySessionID(sessionID)
-	if err != nil {
-		errorMessage := "session " + sessionID + " not found in node pool: " + err.Error()
-		log.Infof(errorMessage)
-		http.Error(rw, errorMessage, http.StatusNotFound)
-		return
+	targetNode, ok := h.Cache.Get(sessionID)
+	var err error
+	if !ok {
+		targetNode, err = h.Pool.GetNodeBySessionID(sessionID)
+		if err != nil {
+			errorMessage := "session " + sessionID + " not found in node pool: " + err.Error()
+			log.Infof(errorMessage)
+			http.Error(rw, errorMessage, http.StatusNotFound)
+			return
+		}
+		h.Cache.Set(sessionID, targetNode)
 	}
 
 	proxy := httputil.NewSingleHostReverseProxy(&url.URL{

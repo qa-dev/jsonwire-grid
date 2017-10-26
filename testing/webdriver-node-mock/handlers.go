@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+var constResponse = RandStringRunes(10000)
+
 // status return current status
 func status(rw http.ResponseWriter, r *http.Request) {
 	sessions := &jsonwire.Message{}
@@ -108,7 +110,7 @@ func useSession(rw http.ResponseWriter, r *http.Request) {
 	case parsedUrl[2] == "" && r.Method == http.MethodDelete: // session closed by client
 		currentSessionID = ""
 	default:
-		responseMessage.Value = RandStringRunes(10000)
+		responseMessage.Value = constResponse
 	}
 	err := json.NewEncoder(rw).Encode(responseMessage)
 	if err != nil {
