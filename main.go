@@ -94,13 +94,22 @@ func main() {
 		}
 	}()
 
+	cache := pool.NewCache(time.Minute * 10) // todo: move to config
+
+	go func() {
+		for {
+			cache.CleanUp()
+			time.Sleep(time.Minute) // todo: move to config
+		}
+	}()
+
 	m := middleware.NewLogMiddleware(statsdClient)
 	http.Handle("/wd/hub/session", m.Log(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory})) //selenium
 	http.Handle("/session", m.Log(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory}))        //wda
 	http.Handle("/grid/register", m.Log(&handlers.RegisterNode{Pool: poolInstance}))
 	http.Handle("/grid/api/proxy", &handlers.APIProxy{Pool: poolInstance})
 	http.HandleFunc("/_info", heartbeat)
-	http.Handle("/", m.Log(&handlers.UseSession{Pool: poolInstance}))
+	http.Handle("/", m.Log(&handlers.UseSession{Pool: poolInstance, Cache: cache}))
 
 	server := &http.Server{Addr: fmt.Sprintf(":%v", cfg.Grid.Port)}
 	serverError := make(chan error)
