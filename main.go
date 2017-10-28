@@ -116,7 +116,6 @@ func main() {
 	go func() {
 		err = server.ListenAndServe()
 		if err != nil {
-			// todo: норма ли что при вызове server.Shutdown всегда возвращается еррор???
 			serverError <- err
 		}
 	}()
