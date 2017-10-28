@@ -5,18 +5,20 @@ import (
 	"sync"
 )
 
+// ComparatorInterface - interface of capabilities comparator.
 type ComparatorInterface interface {
 	Compare(desired Capabilities, available Capabilities) bool
 	Register(Capabilities)
 }
 
 type Comparator struct {
-	// полный список всевозможных зарегистрированных capabilities, для того чтобы отличать те по которым фильтруем,
-	// от тех которые просто прокидываем
+	// a full list of all possible registered capabilities,
+	// it is necessary to distinguish those on which we filter, from those that proxy.
 	registeredCaps      map[string]struct{}
 	registeredCapsMutex sync.RWMutex
 }
 
+// NewComparator - constructor of comparator.
 func NewComparator() *Comparator {
 	return &Comparator{
 		// define default capabilities for filtration
@@ -30,6 +32,7 @@ func NewComparator() *Comparator {
 	}
 }
 
+// Compare - compare two set of capabilities.
 func (c *Comparator) Compare(desired Capabilities, available Capabilities) bool {
 	for name, currCap := range desired {
 		if !c.isRegistered(name) {
@@ -42,6 +45,7 @@ func (c *Comparator) Compare(desired Capabilities, available Capabilities) bool 
 	return true
 }
 
+// Register - registers capabilities for filtration.
 func (c *Comparator) Register(caps Capabilities) {
 	c.registeredCapsMutex.Lock()
 	defer c.registeredCapsMutex.Unlock()

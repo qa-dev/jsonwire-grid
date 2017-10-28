@@ -12,6 +12,7 @@ import (
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 )
 
+// RegisterNode - Receives requests to register nodes for persistent strategy.
 type RegisterNode struct {
 	Pool *pool.Pool
 }

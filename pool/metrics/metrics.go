@@ -7,16 +7,19 @@ import (
 	"time"
 )
 
+// Sender - metrics sender.
 type Sender struct {
 	statd    *statsd.Client
 	pool     *pool.Pool
 	duration time.Duration
 }
 
+// NewSender - constructor of sender.
 func NewSender(statd *statsd.Client, pool *pool.Pool, duration time.Duration) *Sender {
 	return &Sender{statd, pool, duration}
 }
 
+// NewSender - sends metrics of nodes availability.
 func (s *Sender) SendAll() {
 	for {
 		s.countAvailableNodes()

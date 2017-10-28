@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// Config - settings of application.
 type Config struct {
 	Logger Logger `json:"logger"`
 	DB     DB     `json:"db"`
@@ -14,6 +15,7 @@ type Config struct {
 	Statsd Statsd `json:"statsd"`
 }
 
+// Grid general settings
 type Grid struct {
 	ClientType       string     `json:"client_type"`
 	Port             int        `json:"port"`
@@ -23,6 +25,7 @@ type Grid struct {
 	ReservedDuration string `json:"reserved_node_duration"` // duration string format ex. 12m, see time.ParseDuration()
 }
 
+// Strategy - Describes the algorithm of node selection.
 type Strategy struct {
 	Params   json.RawMessage `json:"params"` // ex. docker config, kubernetes config, etc.
 	Type     string          `json:"type"`
@@ -30,20 +33,24 @@ type Strategy struct {
 	NodeList []Node          `json:"node_list"`
 }
 
+// Node - Describes node properties and capabilities. Applicable only for on-demand strategies.
 type Node struct {
 	Params           json.RawMessage          `json:"params"` // ex. image_name, etc.
 	CapabilitiesList []map[string]interface{} `json:"capabilities_list"`
 }
 
+// Logger - Configuration of logger.
 type Logger struct {
 	Level string `json:"level"`
 }
 
+// DB - Configuration of storage.
 type DB struct {
 	Implementation string `json:"implementation"`
 	Connection     string `json:"connection"`
 }
 
+// Statsd - Settings of metrics sender.
 type Statsd struct {
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
@@ -52,10 +59,12 @@ type Statsd struct {
 	Enable   bool   `json:"enable"`
 }
 
+// New - Constructor of config.
 func New() *Config {
 	return &Config{}
 }
 
+// LoadFromFile - config loader from json file.
 func (c *Config) LoadFromFile(path string) error {
 	log.Printf(path)
 	if path == "" {

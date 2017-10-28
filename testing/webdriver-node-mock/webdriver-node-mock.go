@@ -84,7 +84,7 @@ func register() {
 	log.Info("Try register")
 	register := jsonwire.Register{
 		Configuration: &jsonwire.Configuration{
-			Id:               id,
+			ID:               id,
 			Host:             host,
 			Port:             port,
 			CapabilitiesList: []jsonwire.Capabilities{{"browserName": "firefox"}}},

@@ -4,35 +4,35 @@ import (
 	"net/http"
 )
 
-// LoggedResponseWriter оборачивает http.ResponseWriter
-// Поддерживает возможность чтения ранее записанного статуса ответа
+// LoggedResponseWriter - wraps http.ResponseWriter.
+// Supports the ability to read a previously recorded response status.
 type LoggedResponseWriter struct {
 	responseWriter http.ResponseWriter
 	status         int
 }
 
-// Header возвращает результат вызова метода Header() оборачиваемого http.ResponseWriter
+// Header returns the result of calling the Header() method of the wrapped http.ResponseWriter.
 func (lrw *LoggedResponseWriter) Header() http.Header {
 	return lrw.responseWriter.Header()
 }
 
-// Write возвращает результат вызова метода Write() оборачиваемого http.ResponseWriter
+// Write returns the result of calling the Write() method of the wrapped http.ResponseWriter.
 func (lrw *LoggedResponseWriter) Write(data []byte) (int, error) {
 	return lrw.responseWriter.Write(data)
 }
 
-// WriteHeader возвращает результат вызова метода WriteHeader() оборачиваемого http.ResponseWriter
+// WriteHeader returns the result of calling the WriteHeader() method of the wrapped http.ResponseWriter
 func (lrw *LoggedResponseWriter) WriteHeader(status int) {
 	lrw.status = status
 	lrw.responseWriter.WriteHeader(status)
 }
 
-// Status возвращает ранее записанный статус ответа
+// Status - returns the previously recorded response status.
 func (lrw *LoggedResponseWriter) Status() int {
 	return lrw.status
 }
 
-// ResponseWriter возвращает оборочиваемый ResponseWriter
+// ResponseWriter returns wrapped ResponseWriter.
 func (lrw *LoggedResponseWriter) ResponseWriter() http.ResponseWriter {
 	return lrw.responseWriter
 }

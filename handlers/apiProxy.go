@@ -8,6 +8,7 @@ import (
 	"github.com/qa-dev/jsonwire-grid/pool"
 )
 
+// APIProxy - responds with information about whether the node is registered.
 type APIProxy struct {
 	Pool *pool.Pool
 }

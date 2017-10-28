@@ -16,6 +16,7 @@ import (
 	"net/url"
 )
 
+// CreateSession - Receives requests to create session.
 type CreateSession struct {
 	Pool          *pool.Pool
 	ClientFactory jsonwire.ClientFactoryInterface

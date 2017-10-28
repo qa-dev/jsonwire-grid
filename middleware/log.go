@@ -11,19 +11,19 @@ import (
 	"regexp"
 )
 
-// LogMiddleware оборачивает добавляет логгирование к обработчикам запросов.
+// LogMiddleware - wraps adds logging to the query handlers.
 type LogMiddleware struct {
 	statsd *statsd.Client
 }
 
-// NewLogMiddleware возвраащет новый LogMiddleware.
+// NewLogMiddleware - constructor of LogMiddleware.
 func NewLogMiddleware(statsd *statsd.Client) *LogMiddleware {
 	return &LogMiddleware{
 		statsd: statsd,
 	}
 }
 
-// Log оборачивает http.Handler для логирования времени выполнения.
+// Log - wraps http.Handler for runtime logging.
 func (m *LogMiddleware) Log(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 

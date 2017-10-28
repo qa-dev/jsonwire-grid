@@ -10,6 +10,7 @@ import (
 	"github.com/qa-dev/jsonwire-grid/pool"
 )
 
+// UseSession - Receives requests to use session.
 type UseSession struct {
 	Pool  *pool.Pool
 	Cache *pool.Cache
