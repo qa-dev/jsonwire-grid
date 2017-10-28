@@ -7,6 +7,7 @@ import (
 	"github.com/qa-dev/jsonwire-grid/config"
 )
 
+// Init - initialisation of logger.
 func Init(logger config.Logger) error {
 	level, err := logrus.ParseLevel(logger.Level)
 	if err != nil {

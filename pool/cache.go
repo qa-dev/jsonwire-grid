@@ -5,7 +5,8 @@ import (
 	"time"
 )
 
-// Cache no thread safe
+// Cache - caches nodes by session ID.
+// !!! no thread safe
 type Cache struct {
 	storage        map[string]*cacheEntry
 	expirationTime time.Duration
@@ -17,6 +18,7 @@ type cacheEntry struct {
 	created time.Time
 }
 
+// NewCache - constructor of Cache.
 func NewCache(expirationTime time.Duration) *Cache {
 	return &Cache{
 		storage:        make(map[string]*cacheEntry),
@@ -24,6 +26,7 @@ func NewCache(expirationTime time.Duration) *Cache {
 	}
 }
 
+// Set - caches a node.
 func (c *Cache) Set(key string, node *Node) {
 	c.Lock()
 	c.storage[key] = &cacheEntry{
@@ -33,6 +36,7 @@ func (c *Cache) Set(key string, node *Node) {
 	c.Unlock()
 }
 
+// Get - returns node from cache.
 func (c *Cache) Get(key string) (node *Node, ok bool) {
 	c.RLock()
 	entry, ok := c.storage[key]
@@ -44,9 +48,10 @@ func (c *Cache) Get(key string) (node *Node, ok bool) {
 	return entry.node, true
 }
 
+// CleanUp - removes an expired cache.
 func (c *Cache) CleanUp() {
 	c.Lock()
-	for i, _ := range c.storage {
+	for i := range c.storage {
 		if time.Since(c.storage[i].created) > c.expirationTime {
 			delete(c.storage, i)
 		}
