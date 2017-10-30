@@ -30,22 +30,26 @@ func (t *CreateSessionTransport) RoundTrip(request *http.Request) (*http.Respons
 	defer func() { t.Error = err }() // dirty hack, for get error from round trip
 	response, err := http.DefaultTransport.RoundTrip(request)
 	if err != nil {
-		return nil, errors.New("round trip to node: " + err.Error())
+		err = errors.New("round trip to node: " + err.Error())
+		return nil, err
 	}
 
 	b, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, errors.New("read node response: " + err.Error())
+		err = errors.New("read node response: " + err.Error())
+		return nil, err
 	}
 	err = response.Body.Close()
 	if err != nil {
-		return nil, errors.New("close response body: " + err.Error())
+		err = errors.New("close response body: " + err.Error())
+		return nil, err
 	}
 
 	var message jsonwire.NewSession
 	err = json.Unmarshal(b, &message)
 	if err != nil {
-		return nil, errors.New("read body with sessionID: " + err.Error())
+		err = errors.New("read body with sessionID: " + err.Error())
+		return nil, err
 	}
 	var sessionID string
 	switch {
@@ -54,14 +58,16 @@ func (t *CreateSessionTransport) RoundTrip(request *http.Request) (*http.Respons
 	case message.Value.SessionID != "":
 		sessionID = message.Value.SessionID
 	default:
-		return nil, fmt.Errorf("session not created, response: %s", string(b))
+		err = fmt.Errorf("session not created, response: %s", string(b))
+		return nil, err
 	}
 	log.Infof("register SessionID: %s on node %s", sessionID, t.node.Address)
 	err = t.pool.RegisterSession(t.node, sessionID)
 	if err != nil {
-		return nil, fmt.Errorf("sessionId not registred in storage: %s", sessionID)
+		err = fmt.Errorf("sessionId not registred in storage: %s", sessionID)
+		return nil, err
 	}
 	response.Body = ioutil.NopCloser(bytes.NewReader(b))
 	t.IsSuccess = true
-	return response, err
+	return response, nil
 }
