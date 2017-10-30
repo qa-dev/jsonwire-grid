@@ -48,7 +48,7 @@ func (t *CreateSessionTransport) RoundTrip(request *http.Request) (*http.Respons
 	var message jsonwire.NewSession
 	err = json.Unmarshal(b, &message)
 	if err != nil {
-		err = errors.New("read body with sessionID: " + err.Error())
+		err = errors.New("read body with sessionID: " + err.Error() + " body content:" + string(b))
 		return nil, err
 	}
 	var sessionID string
