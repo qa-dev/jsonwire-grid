@@ -115,5 +115,5 @@ Configurations are stored in json files. Example:
 | Strategy option           | Possible values | Description                 |
 |-------------------------- | --------------- | --------------------------- |
 | params                    | -               | Omit this property.         |
-| node_list.[].params.image | -               | Docker image with selenium. |
-| node_list.[].params.port  | -               | Port of selenium.           |
+| node_list.[].params.image | string          | Docker image with selenium. |
+| node_list.[].params.port  | string          | Port of selenium.           |
