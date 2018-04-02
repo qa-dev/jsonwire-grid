@@ -38,6 +38,9 @@ func (c *Comparator) Compare(desired Capabilities, available Capabilities) bool 
 		if !c.isRegistered(name) {
 			continue
 		}
+		if name == "platform" && currCap == "ANY" {
+			currCap = available[name]
+		}
 		if !reflect.DeepEqual(currCap, available[name]) {
 			return false
 		}
