@@ -51,6 +51,16 @@ func TestComparator_Compare(t *testing.T) {
 		{
 			expectedResult: true,
 		},
+		{
+			Capabilities{"platform": "ANY", "myDogName": "petr"},
+			Capabilities{"platform": "LINUX-TORVALDS"},
+			true,
+		},
+		{
+			Capabilities{"platform": "ANY", "myDogName": "petr"},
+			Capabilities{"not-defined-platform": "trololo"},
+			true,
+		},
 	}
 
 	comp := NewComparator()

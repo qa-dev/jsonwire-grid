@@ -38,8 +38,9 @@ func (c *Comparator) Compare(desired Capabilities, available Capabilities) bool 
 		if !c.isRegistered(name) {
 			continue
 		}
+		// workaround for support jsonwire clients
 		if name == "platform" && currCap == "ANY" {
-			currCap = available[name]
+			continue
 		}
 		if !reflect.DeepEqual(currCap, available[name]) {
 			return false
