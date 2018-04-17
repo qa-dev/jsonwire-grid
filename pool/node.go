@@ -18,6 +18,7 @@ const (
 )
 
 type Node struct {
+	Key             string
 	Type             NodeType
 	Address          string
 	Status           NodeStatus
@@ -32,6 +33,7 @@ func (n *Node) String() string {
 }
 
 func NewNode(
+	key string,
 	t NodeType,
 	address string,
 	status NodeStatus,
@@ -41,6 +43,7 @@ func NewNode(
 	capabilitiesList []capabilities.Capabilities,
 ) *Node {
 	return &Node{
+		key,
 		t,
 		address,
 		status,

@@ -42,7 +42,7 @@ func (f *StrategyFactory) Create(
 		return nil, errors.New("create k8s clientset, " + err.Error())
 	}
 
-	provider := &kubernetesProvider{
+	provider := &kubDnsProvider{
 		clientset:     clientset,
 		namespace:     "default", //todo: брать из конфига !!!
 		clientFactory: clientFactory,

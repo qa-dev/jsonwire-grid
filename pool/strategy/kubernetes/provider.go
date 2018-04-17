@@ -9,20 +9,22 @@ import (
 	"net"
 	"strconv"
 	"time"
+	"strings"
 )
 
 type kubernetesProviderInterface interface {
 	Create(podName string, nodeParams nodeParams) error
+	// idempotent operation
 	Destroy(podName string) error
 }
 
-type kubernetesProvider struct {
+type kubDnsProvider struct {
 	clientset     *kubernetes.Clientset
 	namespace     string
 	clientFactory jsonwire.ClientFactoryInterface
 }
 
-func (p *kubernetesProvider) Create(podName string, nodeParams nodeParams) error {
+func (p *kubDnsProvider) Create(podName string, nodeParams nodeParams) error {
 	pod := &apiV1.Pod{}
 	pod.ObjectMeta.Name = podName
 	pod.ObjectMeta.Labels = map[string]string{"name": podName}
@@ -78,16 +80,22 @@ Loop:
 	return nil
 }
 
-func (p *kubernetesProvider) Destroy(podName string) error {
+//Destroy - destroy all pod data (idempotent operation)
+func (p *kubDnsProvider) Destroy(podName string) error {
 	err := p.clientset.CoreV1Client.Pods(p.namespace).Delete(podName, &apiV1.DeleteOptions{})
-	if err != nil {
+	switch {
+	case err != nil && strings.Contains(err.Error(), "not found"):
+		// pod already deleted
+	case err != nil:
 		err = errors.New("send command pod/delete to k8s, " + err.Error())
 		return err
 	}
 	err = p.clientset.CoreV1Client.Services(p.namespace).Delete(podName, &apiV1.DeleteOptions{})
-	if err != nil {
-		err = errors.New("send command service/delete to k8s, " + err.Error())
-		return err
+	switch {
+	case err != nil && strings.Contains(err.Error(), "not found"):
+		// service already deleted
+	case err != nil:
+		return errors.New("send command service/delete to k8s, " + err.Error())
 	}
 	return nil
 }

@@ -68,12 +68,12 @@ func (p *Pool) ReserveAvailableNode(caps capabilities.Capabilities) (*Node, erro
 	return &node, err
 }
 
-func (p *Pool) Add(t NodeType, address string, capabilitiesList []capabilities.Capabilities) error {
+func (p *Pool) Add(key string, t NodeType, address string, capabilitiesList []capabilities.Capabilities) error {
 	if len(capabilitiesList) == 0 {
 		return errors.New("[Pool/Add] Capabilities must contains more one element")
 	}
 	ts := time.Now().Unix()
-	return p.storage.Add(*NewNode(t, address, NodeStatusAvailable, "", ts, ts, capabilitiesList), 0)
+	return p.storage.Add(*NewNode(key, t, address, NodeStatusAvailable, "", ts, ts, capabilitiesList), 0)
 }
 
 func (p *Pool) RegisterSession(node *Node, sessionID string) error {

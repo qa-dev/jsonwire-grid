@@ -22,6 +22,7 @@ func testStorage_Add(t *testing.T, p PrepareInterface) {
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
 	expectedNode := pool.Node{
+		Key: "111",
 		Address: "address1",
 		CapabilitiesList: []capabilities.Capabilities{
 			{"trololo": "lolo"},
@@ -38,6 +39,7 @@ func testStorage_Add(t *testing.T, p PrepareInterface) {
 		t.Fatal("Error get all nodes list, " + err.Error())
 	}
 	assert.Len(t, nodeList, 1, "Added more than one node")
+	assert.Equal(t, expectedNode.Key, nodeList[0].Key)
 	assert.Equal(t, expectedNode.Type, nodeList[0].Type)
 	assert.Equal(t, expectedNode.Address, nodeList[0].Address)
 	assert.Equal(t, expectedNode.Status, nodeList[0].Status)
@@ -97,6 +99,7 @@ func testStorage_GetAll(t *testing.T, p PrepareInterface) {
 	expectedNodeList := make([]pool.Node, 0)
 	for _, addr := range []string{"addr1", "addr2"} {
 		node := pool.Node{
+			Key: addr,
 			Address:          addr,
 			CapabilitiesList: []capabilities.Capabilities{{"trololo": "lolo"}},
 		}
@@ -113,6 +116,7 @@ func testStorage_GetAll(t *testing.T, p PrepareInterface) {
 		isNodeMatch := false
 		for _, node := range nodeList {
 			if node.Address == expectedNode.Address {
+				assert.Equal(t, expectedNode.Key, node.Key)
 				assert.Equal(t, expectedNode.Type, node.Type)
 				assert.Equal(t, expectedNode.Address, node.Address)
 				assert.Equal(t, expectedNode.Status, node.Status)

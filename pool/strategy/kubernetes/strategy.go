@@ -8,6 +8,7 @@ import (
 	"github.com/satori/go.uuid"
 	"net"
 	"time"
+	"fmt"
 )
 
 type Strategy struct {
@@ -25,14 +26,17 @@ func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, er
 	podName := "wd-node-" + uuid.NewV4().String()
 	ts := time.Now().Unix()
 	address := net.JoinHostPort(podName, nodeConfig.Params.Port)
-	node := pool.NewNode(pool.NodeTypeKubernetes, address, pool.NodeStatusReserved, "", ts, ts, []capabilities.Capabilities{})
+	node := pool.NewNode(podName, pool.NodeTypeKubernetes, address, pool.NodeStatusReserved, "", ts, ts, []capabilities.Capabilities{})
 	err := s.storage.Add(*node, s.config.Limit)
 	if err != nil {
 		return pool.Node{}, errors.New("add node to storage, " + err.Error())
 	}
 	err = s.provider.Create(podName, nodeConfig.Params)
 	if err != nil {
-		_ = s.provider.Destroy(podName) // на случай если что то успело создасться
+		go func(podName string) {
+			time.Sleep(time.Minute * 2)
+			_ = s.provider.Destroy(podName) // на случай если что то криво создалось
+		}(podName)
 		return pool.Node{}, errors.New("create node by provider, " + err.Error())
 	}
 	return *node, nil
@@ -43,11 +47,10 @@ func (s *Strategy) CleanUp(node pool.Node) error {
 	if node.Type != pool.NodeTypeKubernetes {
 		return strategy.ErrNotApplicable
 	}
-	hostName, _, err := net.SplitHostPort(node.Address)
-	if err != nil {
-		return errors.New("get hostname from node.Address, " + err.Error())
+	if node.Key == "" {
+		return fmt.Errorf("empty node key")
 	}
-	err = s.provider.Destroy(hostName)
+	err := s.provider.Destroy(node.Key)
 	if err != nil {
 		return errors.New("destroy node by provider, " + err.Error())
 	}
@@ -62,11 +65,10 @@ func (s *Strategy) FixNodeStatus(node pool.Node) error {
 	if node.Type != pool.NodeTypeKubernetes {
 		return strategy.ErrNotApplicable
 	}
-	hostName, _, err := net.SplitHostPort(node.Address)
-	if err != nil {
-		return errors.New("get hostname from node.Address, " + err.Error())
+	if node.Key == "" {
+		return fmt.Errorf("empty node key")
 	}
-	err = s.provider.Destroy(hostName)
+	err := s.provider.Destroy(node.Key)
 	if err != nil {
 		return errors.New("destroy node by provider, " + err.Error())
 	}

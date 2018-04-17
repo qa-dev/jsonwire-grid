@@ -13,6 +13,7 @@ import (
 
 type MysqlNodeModel struct {
 	ID         string `db:"id"`
+	Key  string `db:"key"`
 	Type       string `db:"type"`
 	Address    string `db:"address"`
 	Status     string `db:"status"`
@@ -45,13 +46,14 @@ func (s *MysqlStorage) Add(node pool.Node, limit int) error {
 	}
 	// black magic, but it works
 	result, err := tx.NamedExec(
-		"INSERT INTO node (type, address, status, sessionId, updated, registred) "+
-			"SELECT :type, :address, :status, :sessionId, :updated, :registred "+
+		"INSERT INTO node (`key`, type, address, status, sessionId, updated, registred) "+
+			"SELECT :key, :type, :address, :status, :sessionId, :updated, :registred "+
 			"FROM DUAL "+
 			"WHERE 0 = :limit OR EXISTS (SELECT TRUE FROM node WHERE type = :type HAVING count(*) < :limit)"+
 			"ON DUPLICATE KEY UPDATE "+
-			"type = :type, status = :status, sessionId = :sessionId, updated = :updated, registred = :registred",
+			"`key` = :key, type = :type, status = :status, sessionId = :sessionId, updated = :updated, registred = :registred",
 		map[string]interface{}{
+			"key":      node.Key,
 			"type":      string(node.Type),
 			"address":   node.Address,
 			"sessionId": node.SessionID,
@@ -333,6 +335,7 @@ func (s *MysqlStorage) Remove(node pool.Node) error {
 
 func mapper(model *MysqlNodeModel) *pool.Node {
 	node := pool.NewNode(
+		model.Key,
 		pool.NodeType(model.Type),
 		model.Address,
 		pool.NodeStatus(model.Status),

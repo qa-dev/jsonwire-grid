@@ -74,7 +74,7 @@ func TestStrategy_CleanUp_Positive(t *testing.T) {
 	sm := new(pool.StorageMock)
 	sm.On("Remove", mock.AnythingOfType("pool.Node")).Return(nil)
 	s := Strategy{storage: sm, provider: pm}
-	node := pool.Node{Type: pool.NodeTypeKubernetes, Address: "host:port"}
+	node := pool.Node{Key: "valid_key", Type: pool.NodeTypeKubernetes}
 	err := s.CleanUp(node)
 	assert.Nil(t, err)
 }
@@ -86,9 +86,9 @@ func TestStrategy_CleanUp_Negative_NodeType(t *testing.T) {
 	assert.Error(t, err, strategy.ErrNotApplicable)
 }
 
-func TestStrategy_CleanUp_Negative_InvalidNodeAddress(t *testing.T) {
+func TestStrategy_CleanUp_Negative_EmptyNodeKey(t *testing.T) {
 	s := Strategy{}
-	node := pool.Node{Type: pool.NodeTypeKubernetes, Address: "invalid node address"}
+	node := pool.Node{Key: "", Type: pool.NodeTypeKubernetes} // empty node key
 	err := s.CleanUp(node)
 	assert.NotNil(t, err)
 }
@@ -119,7 +119,7 @@ func TestStrategy_FixNodeStatus_Positive(t *testing.T) {
 	sm := new(pool.StorageMock)
 	sm.On("Remove", mock.AnythingOfType("pool.Node")).Return(nil)
 	s := Strategy{storage: sm, provider: pm}
-	node := pool.Node{Type: pool.NodeTypeKubernetes, Address: "host:port"}
+	node := pool.Node{ Key: "valid_key", Type: pool.NodeTypeKubernetes}
 	err := s.FixNodeStatus(node)
 	assert.Nil(t, err)
 }
@@ -131,9 +131,9 @@ func TestStrategy_FixNodeStatus_Negative_NodeType(t *testing.T) {
 	assert.Error(t, err, strategy.ErrNotApplicable)
 }
 
-func TestStrategy_FixNodeStatus_Negative_InvalidNodeAddress(t *testing.T) {
+func TestStrategy_FixNodeStatus_Negative_EmptyNodeKey(t *testing.T) {
 	s := Strategy{}
-	node := pool.Node{Type: pool.NodeTypeKubernetes, Address: "invalid node address"}
+	node := pool.Node{Key: "", Type: pool.NodeTypeKubernetes}
 	err := s.FixNodeStatus(node)
 	assert.NotNil(t, err)
 }

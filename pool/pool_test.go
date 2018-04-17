@@ -47,7 +47,7 @@ func TestPool_Add_Positive(t *testing.T) {
 	p := NewPool(s, new(StrategyListMock))
 	eAddress := "127.0.0.1"
 	eNodeType := NodeTypePersistent
-	err := p.Add(eNodeType, eAddress, []capabilities.Capabilities{{"browserName": "ololo"}})
+	err := p.Add("1234", eNodeType, eAddress, []capabilities.Capabilities{{"browserName": "ololo"}})
 	a.Nil(err)
 }
 
@@ -59,7 +59,7 @@ func TestPool_Add_Negative(t *testing.T) {
 	p := NewPool(s, new(StrategyListMock))
 	eAddress := "127.0.0.1"
 	eNodeType := NodeTypePersistent
-	err := p.Add(eNodeType, eAddress, []capabilities.Capabilities{})
+	err := p.Add("1234", eNodeType, eAddress, []capabilities.Capabilities{})
 	a.Error(err)
 }
 
@@ -225,7 +225,7 @@ func TestPool_fixNodeStatus_Positive_BusyExpired(t *testing.T) {
 	slm := new(StrategyListMock)
 	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(nil)
 	p := NewPool(new(StorageMock), slm)
-	node := NewNode(NodeTypePersistent, "", NodeStatusBusy, "", 0, 0, []capabilities.Capabilities{})
+	node := NewNode("123", NodeTypePersistent, "", NodeStatusBusy, "", 0, 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.True(isFixed)
 	a.Nil(err)
@@ -236,7 +236,7 @@ func TestPool_fixNodeStatus_Positive_ReservedExpired(t *testing.T) {
 	slm := new(StrategyListMock)
 	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(nil)
 	p := NewPool(new(StorageMock), slm)
-	node := NewNode(NodeTypePersistent, "", NodeStatusReserved, "", 0, 0, []capabilities.Capabilities{})
+	node := NewNode("123", NodeTypePersistent, "", NodeStatusReserved, "", 0, 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.True(isFixed)
 	a.Nil(err)
@@ -247,7 +247,7 @@ func TestPool_fixNodeStatus_Positive_BusyNotNotExpired(t *testing.T) {
 	slm := new(StrategyListMock)
 	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(nil)
 	p := NewPool(new(StorageMock), slm)
-	node := NewNode(NodeTypePersistent, "", NodeStatusBusy, "", time.Now().Unix(), 0, []capabilities.Capabilities{})
+	node := NewNode("123", NodeTypePersistent, "", NodeStatusBusy, "", time.Now().Unix(), 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.False(isFixed)
 	a.Nil(err)
@@ -258,7 +258,7 @@ func TestPool_fixNodeStatus_Positive_ReservedNotNotExpired(t *testing.T) {
 	slm := new(StrategyListMock)
 	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(nil)
 	p := NewPool(new(StorageMock), slm)
-	node := NewNode(NodeTypePersistent, "", NodeStatusReserved, "", time.Now().Unix(), 0, []capabilities.Capabilities{})
+	node := NewNode("123", NodeTypePersistent, "", NodeStatusReserved, "", time.Now().Unix(), 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.False(isFixed)
 	a.Nil(err)
@@ -269,7 +269,7 @@ func TestPool_fixNodeStatus_Positive_AvailableExpired(t *testing.T) {
 	slm := new(StrategyListMock)
 	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(nil)
 	p := NewPool(new(StorageMock), slm)
-	node := NewNode(NodeTypePersistent, "", NodeStatusAvailable, "", 0, 0, []capabilities.Capabilities{})
+	node := NewNode("123", NodeTypePersistent, "", NodeStatusAvailable, "", 0, 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.False(isFixed)
 	a.Nil(err)
@@ -281,7 +281,7 @@ func TestPool_fixNodeStatus_NegativeBusy(t *testing.T) {
 	slm := new(StrategyListMock)
 	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(eError)
 	p := NewPool(new(StorageMock), slm)
-	node := NewNode(NodeTypePersistent, "", NodeStatusBusy, "", 0, 0, []capabilities.Capabilities{})
+	node := NewNode("123", NodeTypePersistent, "", NodeStatusBusy, "", 0, 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.False(isFixed)
 	a.Error(err)
@@ -293,7 +293,7 @@ func TestPool_fixNodeStatus_NegativeReserved(t *testing.T) {
 	slm := new(StrategyListMock)
 	slm.On("FixNodeStatus", mock.AnythingOfType("pool.Node")).Return(eError)
 	p := NewPool(new(StorageMock), slm)
-	node := NewNode(NodeTypePersistent, "", NodeStatusReserved, "", 0, 0, []capabilities.Capabilities{})
+	node := NewNode("123", NodeTypePersistent, "", NodeStatusReserved, "", 0, 0, []capabilities.Capabilities{})
 	isFixed, err := p.fixNodeStatus(node)
 	a.False(isFixed)
 	a.Error(err)
