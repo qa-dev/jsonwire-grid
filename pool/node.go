@@ -29,7 +29,7 @@ type Node struct {
 }
 
 func (n *Node) String() string {
-	return "Node [" + n.Address + "]"
+	return "Node [" + n.Key + "]"
 }
 
 func NewNode(

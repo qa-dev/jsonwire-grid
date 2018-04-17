@@ -148,7 +148,7 @@ func (p *Pool) FixNodeStatuses() {
 			continue
 		}
 		if isFixed {
-			log.Infof("Node [%s] status fixed", node.Address)
+			log.Infof("Node [%s] status fixed", node.Key)
 		}
 	}
 }
@@ -169,7 +169,7 @@ func (p *Pool) fixNodeStatus(node *Node) (bool, error) {
 	}
 	err := p.strategyList.FixNodeStatus(*node)
 	if err != nil {
-		return false, fmt.Errorf("Can't fix node [%s] status, %s", node.Address, err.Error())
+		return false, fmt.Errorf("Can't fix node [%s] status, %s", node.Key, err.Error())
 	}
 	return true, nil
 }
