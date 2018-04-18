@@ -8,6 +8,7 @@ import (
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	log "github.com/Sirupsen/logrus"
 )
 
 type StrategyFactory struct {
@@ -31,6 +32,8 @@ func (f *StrategyFactory) Create(
 		}
 	}
 
+	log.Debugf("strategy kubernetes config, %+v", strategyConfig)
+
 	//todo: выпилить этот говноклиент, когда будет работать нормальный
 	kubConfig, err := rest.InClusterConfig()
 	if err != nil {
@@ -44,7 +47,8 @@ func (f *StrategyFactory) Create(
 
 	provider := &kubDnsProvider{
 		clientset:     clientset,
-		namespace:     "default", //todo: брать из конфига !!!
+		namespace:     strategyConfig.Params.Namespace,
+		podCreationTimeout: strategyConfig.Params.PodCreationTimeout,
 		clientFactory: clientFactory,
 	}
 

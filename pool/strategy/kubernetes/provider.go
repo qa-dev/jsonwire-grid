@@ -22,6 +22,7 @@ type kubernetesProviderInterface interface {
 type kubDnsProvider struct {
 	clientset     *kubernetes.Clientset
 	namespace     string
+	podCreationTimeout     time.Duration
 	clientFactory jsonwire.ClientFactoryInterface
 }
 
@@ -44,13 +45,13 @@ func (p *kubDnsProvider) Create(podName string, nodeParams nodeParams) (nodeAddr
 		return "", errors.New("send command pod/create to k8s, " + err.Error())
 	}
 
-	stopWaitIP := time.After(40 * time.Second)
+	stop := time.After(p.podCreationTimeout)
 	log.Debugf("start waiting pod ip")
 	var createdPodIP string
 LoopWaitIP:
 	for {
 		select {
-		case <-stopWaitIP:
+		case <-stop:
 			return "", fmt.Errorf("wait podIP stopped by timeout, %v", podName)
 		default:
 			time.Sleep(time.Second)
@@ -71,7 +72,6 @@ LoopWaitIP:
 	// todo: пока так ожидаем поднятие ноды, так как не понятно что конкретно означают статусы возвращаемые через апи
 	nodeAddress = net.JoinHostPort(createdPodIP, nodeParams.Port)
 	client := p.clientFactory.Create(nodeAddress)
-	stop := time.After(40 * time.Second)
 	log.Debugln("start waiting selenium")
 LoopWaitSelenium:
 	for {
