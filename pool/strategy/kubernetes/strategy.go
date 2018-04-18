@@ -6,7 +6,6 @@ import (
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"github.com/qa-dev/jsonwire-grid/pool/strategy"
 	"github.com/satori/go.uuid"
-	"net"
 	"time"
 	"fmt"
 )
@@ -25,13 +24,12 @@ func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, er
 	}
 	podName := "wd-node-" + uuid.NewV4().String()
 	ts := time.Now().Unix()
-	address := net.JoinHostPort(podName, nodeConfig.Params.Port)
-	node := pool.NewNode(podName, pool.NodeTypeKubernetes, address, pool.NodeStatusReserved, "", ts, ts, []capabilities.Capabilities{})
+	node := pool.NewNode(podName, pool.NodeTypeKubernetes, "temp-value-replace-me", pool.NodeStatusReserved, "", ts, ts, []capabilities.Capabilities{})
 	err := s.storage.Add(*node, s.config.Limit)
 	if err != nil {
 		return pool.Node{}, errors.New("add node to storage, " + err.Error())
 	}
-	err = s.provider.Create(podName, nodeConfig.Params)
+	nodeAddress, err := s.provider.Create(podName, nodeConfig.Params)
 	if err != nil {
 		go func(podName string) {
 			time.Sleep(time.Minute * 2)
@@ -39,6 +37,12 @@ func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, er
 		}(podName)
 		return pool.Node{}, errors.New("create node by provider, " + err.Error())
 	}
+
+	err = s.storage.UpdateAddress(*node, nodeAddress)
+	if err != nil {
+		return pool.Node{}, errors.New("update node address in storage, " + err.Error())
+	}
+	node.Address = nodeAddress
 	return *node, nil
 
 }
