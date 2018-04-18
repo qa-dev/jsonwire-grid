@@ -333,6 +333,27 @@ func (s *MysqlStorage) Remove(node pool.Node) error {
 	return nil
 }
 
+func (s *MysqlStorage) UpdateAddress(node pool.Node, newAddress string) error {
+	res, err := s.db.Exec(
+		"UPDATE node SET address = ? WHERE `key` = ?",
+		newAddress,
+		node.Key,
+	)
+	if err != nil {
+		err = errors.New("[MysqlStorage/UpdateAddress] update table `node`, " + err.Error())
+		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		err = errors.New("[MysqlStorage/UpdateAddress] get affected rows, " + err.Error())
+		return err
+	}
+	if rowsAffected == 0 {
+		return storage.ErrNotFound
+	}
+	return nil
+}
+
 func mapper(model *MysqlNodeModel) *pool.Node {
 	node := pool.NewNode(
 		model.Key,

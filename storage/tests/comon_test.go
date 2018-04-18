@@ -1,6 +1,7 @@
 package tests
 
 import (
+	storageLib "github.com/qa-dev/jsonwire-grid/storage"
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"github.com/stretchr/testify/assert"
@@ -293,4 +294,38 @@ func testStorage_SetBusy(t *testing.T, p PrepareInterface) {
 	}
 	assert.Equal(t, pool.NodeStatusBusy, node.Status, "Node not Busy")
 	assert.Equal(t, expectedSessionID, node.SessionID, "Not saved sessionID")
+}
+
+// testStorage_UpdateAdderss_UpdatesValue успешное обновления адреса ноды
+func testStorage_UpdateAdderss_UpdatesValue(t *testing.T, p PrepareInterface) {
+	t.Parallel()
+	storage, deferFunc := p.CreateStorage()
+	defer deferFunc()
+	node := pool.Node{SessionID: "sess", Key: "123", Status: pool.NodeStatusAvailable, Address: "qqqqqq", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
+	err := storage.Add(node, 0)
+	if err != nil {
+		t.Fatal("Error add node, " + err.Error())
+	}
+	expectedAddress := "newAddressId"
+	err = storage.UpdateAddress(node, expectedAddress)
+	assert.Nil(t, err)
+	node, err = storage.GetBySession("sess")
+	if err != nil {
+		t.Fatal("Error add node, " + err.Error())
+	}
+	assert.Equal(t, expectedAddress, node.Address, "Not updated address")
+}
+
+// testStorage_UpdateAdderss_ReturnsErrNotFound попытка обновить несуществующую ноду
+func testStorage_UpdateAdderss_ReturnsErrNotFound(t *testing.T, p PrepareInterface) {
+	t.Parallel()
+	storage, deferFunc := p.CreateStorage()
+	defer deferFunc()
+	node := pool.Node{SessionID: "sess", Key: "123", Status: pool.NodeStatusAvailable, Address: "qqqqqq", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
+	err := storage.Add(pool.Node{Key:"12345"}, 0)
+	if err != nil {
+		t.Fatal("Error add node, " + err.Error())
+	}
+	err = storage.UpdateAddress(node, "trololo")
+	assert.Equal(t, storageLib.ErrNotFound, err)
 }

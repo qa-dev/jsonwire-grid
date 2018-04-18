@@ -155,3 +155,13 @@ func TestMysqlStorage_SetAvailable(t *testing.T) {
 func TestMysqlStorage_SetBusy(t *testing.T) {
 	testStorage_SetBusy(t, mv)
 }
+
+// TestMysqlStorage_UpdateAdderss_UpdatesValue see testStorage_UpdateAdderss_UpdatesValue
+func TestMysqlStorage_UpdateAdderss_UpdatesValue(t *testing.T) {
+	testStorage_UpdateAdderss_UpdatesValue(t, mv)
+}
+
+// TestMysqlStorage_UpdateAdderss_ReturnsErrNotFound see testStorage_UpdateAdderss_ReturnsErrNotFound
+func TestMysqlStorage_UpdateAdderss_ReturnsErrNotFound(t *testing.T) {
+	testStorage_UpdateAdderss_ReturnsErrNotFound(t, mv)
+}

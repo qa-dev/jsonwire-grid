@@ -149,3 +149,21 @@ func TestStorage_Remove_Negative(t *testing.T) {
 	err := s.Remove(node)
 	assert.Error(t, err, storage.ErrNotFound)
 }
+
+func TestStorage_UpdateAddress_UpdatesValue(t *testing.T) {
+	key := "1234567890"
+	node := pool.Node{Address: "1", Key: key}
+	s := Storage{db: map[string]*pool.Node{key: &node}}
+	expectedAddress := "2"
+	err := s.UpdateAddress(node, expectedAddress)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedAddress, s.db[key].Address)
+}
+
+func TestStorage_UpdateAddress_ReturnsErrNotFound(t *testing.T) {
+	key := "1234567890"
+	node := pool.Node{Address: "1", Key: key}
+	s := Storage{db: map[string]*pool.Node{key: &node}}
+	err := s.UpdateAddress(pool.Node{Key:"12345"}, "1234567890")
+	assert.Equal(t, storage.ErrNotFound, err)
+}

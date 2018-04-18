@@ -129,3 +129,14 @@ func (s *Storage) Remove(node pool.Node) error {
 	delete(s.db, node.Key)
 	return nil
 }
+
+func (s *Storage) UpdateAddress(node pool.Node, newAddress string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	storedNode, ok := s.db[node.Key]
+	if !ok {
+		return storage.ErrNotFound
+	}
+	storedNode.Address = newAddress
+	return nil
+}

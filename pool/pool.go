@@ -25,6 +25,7 @@ type StorageInterface interface {
 	GetByAddress(string) (Node, error)
 	GetAll() ([]Node, error)
 	Remove(Node) error
+	UpdateAddress(node Node, newAddress string) error
 }
 
 type StrategyInterface interface {
