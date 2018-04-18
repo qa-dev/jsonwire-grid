@@ -112,8 +112,9 @@ Configurations are stored in json files. Example:
 | node_list       | -               | Omit this property.                                  |
 
 ##### `kubernetes` - on-demand nodes in kubernetes cluster.
-| Strategy option           | Possible values | Description                 |
-|-------------------------- | --------------- | --------------------------- |
-| params                    | -               | Omit this property.         |
-| node_list.[].params.image | string          | Docker image with selenium. |
-| node_list.[].params.port  | string          | Port of selenium.           |
+| Strategy option             | Possible values | Description                                  |
+|--------------------------   | ---------------------- | ------------------------------------- |
+| params.namespace            | string                 | Namespace in k8s for on-demand nodes. |
+| params.pod_creation_timeout | string as `12m`, `60s` | Max waiting time for creating a pod.  |
+| node_list.[].params.image   | string                 | Docker image with selenium.           |
+| node_list.[].params.port    | string                 | Port of selenium.                     |
