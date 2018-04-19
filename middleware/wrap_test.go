@@ -15,7 +15,6 @@ func TestWrap_Add(t *testing.T) {
 		wrap.Add(func(handler http.Handler) http.Handler { return handler })
 	}
 	a.Len(wrap.list, eLen)
-	a.Equal(wrap.len, int8(eLen))
 }
 
 func TestWrap_Do(t *testing.T) {
