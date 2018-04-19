@@ -9,10 +9,10 @@ import (
 
 // Config - settings of application.
 type Config struct {
-	Logger Logger `json:"logger"`
-	DB     DB     `json:"db"`
-	Grid   Grid   `json:"grid"`
-	Statsd Statsd `json:"statsd"`
+	Logger Logger  `json:"logger"`
+	DB     DB      `json:"db"`
+	Grid   Grid    `json:"grid"`
+	Statsd *Statsd `json:"statsd,omitempty"`
 }
 
 // Grid general settings

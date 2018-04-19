@@ -32,16 +32,7 @@ func main() {
 		log.Fatalf("Problem in init logger, %s", err)
 	}
 
-	statsdClient, err := metrics.NewStatsd(
-		cfg.Statsd.Host,
-		cfg.Statsd.Port,
-		cfg.Statsd.Protocol,
-		cfg.Statsd.Prefix,
-		cfg.Statsd.Enable)
-
-	if nil != err {
-		log.Errorf("Statsd create socked error: %s", err)
-	}
+	middlewareWrap := middleware.NewWrap(log.StandardLogger())
 
 	busyNodeDuration, err := time.ParseDuration(cfg.Grid.BusyNodeDuration)
 	if err != nil {
@@ -84,8 +75,7 @@ func main() {
 	poolInstance.SetBusyNodeDuration(busyNodeDuration)
 	poolInstance.SetReservedNodeDuration(reservedNodeDuration)
 
-	poolMetricsSender := poolMetrics.NewSender(statsdClient, poolInstance, time.Second*1) // todo: move to config
-	go poolMetricsSender.SendAll()
+
 
 	go func() {
 		for {
@@ -103,13 +93,29 @@ func main() {
 		}
 	}()
 
-	m := middleware.NewLogMiddleware(statsdClient)
-	http.Handle("/wd/hub/session", m.Log(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory})) //selenium
-	http.Handle("/session", m.Log(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory}))        //wda
-	http.Handle("/grid/register", m.Log(&handlers.RegisterNode{Pool: poolInstance}))
+
+
+	if cfg.Statsd != nil {
+		statsdClient, err := metrics.NewStatsd(
+			cfg.Statsd.Host,
+			cfg.Statsd.Port,
+			cfg.Statsd.Protocol,
+			cfg.Statsd.Prefix,
+			cfg.Statsd.Enable)
+		poolMetricsSender := poolMetrics.NewSender(statsdClient, poolInstance, time.Second*1) // todo: move to config
+		go poolMetricsSender.SendAll()
+		if err != nil {
+			log.Errorf("Statsd create socked error: %s", err)
+		}
+		middlewareWrap.Add(middleware.NewStatsd(log.StandardLogger(), statsdClient, true).RegisterMetrics)
+	}
+	
+	http.Handle("/wd/hub/session", middlewareWrap.Do(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory})) //selenium
+	http.Handle("/session", middlewareWrap.Do(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory}))        //wda
+	http.Handle("/grid/register", middlewareWrap.Do(&handlers.RegisterNode{Pool: poolInstance}))
 	http.Handle("/grid/api/proxy", &handlers.APIProxy{Pool: poolInstance})
 	http.HandleFunc("/_info", heartbeat)
-	http.Handle("/", m.Log(&handlers.UseSession{Pool: poolInstance, Cache: cache}))
+	http.Handle("/", middlewareWrap.Do(&handlers.UseSession{Pool: poolInstance, Cache: cache}))
 
 	server := &http.Server{Addr: fmt.Sprintf(":%v", cfg.Grid.Port)}
 	serverError := make(chan error)

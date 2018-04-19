@@ -8,10 +8,10 @@ import (
 )
 
 // Init - initialisation of logger.
-func Init(logger config.Logger) error {
-	level, err := logrus.ParseLevel(logger.Level)
+func Init(cfgLogger config.Logger) error {
+	level, err := logrus.ParseLevel(cfgLogger.Level)
 	if err != nil {
-		return fmt.Errorf("Parse log level, %v", err)
+		return fmt.Errorf("parse log level, %v", err)
 	}
 	logrus.Infof("Set log level to: %v", level)
 	logrus.SetLevel(level)
