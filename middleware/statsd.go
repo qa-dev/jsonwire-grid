@@ -2,41 +2,38 @@ package middleware
 
 import (
 	"net/http"
-	"runtime/debug"
 	"strings"
 
 	"fmt"
-	log "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 	"gopkg.in/alexcesaro/statsd.v2"
 	"regexp"
 )
 
-// LogMiddleware - wraps adds logging to the query handlers.
-type LogMiddleware struct {
-	statsd *statsd.Client
+// Statsd is statsd metrics middleware.
+type Statsd struct {
+	logger  *logrus.Logger
+	client  *statsd.Client
+	withLog bool
 }
 
-// NewLogMiddleware - constructor of LogMiddleware.
-func NewLogMiddleware(statsd *statsd.Client) *LogMiddleware {
-	return &LogMiddleware{
-		statsd: statsd,
+// NewStatsd construct Statsd.
+func NewStatsd(logger *logrus.Logger, client *statsd.Client, withLog bool) *Statsd {
+	return &Statsd{
+		logger:  logger,
+		client:  client,
+		withLog: withLog,
 	}
 }
 
-// Log - wraps http.Handler for runtime logging.
-func (m *LogMiddleware) Log(handler http.Handler) http.Handler {
+// RegisterMetrics send metrics to statsd
+func (s *Statsd) RegisterMetrics(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-
-		defer func() {
-			if err := recover(); err != nil {
-				log.Fatalf("Panic: %+v\n%s", err, debug.Stack())
-			}
-		}()
 
 		path := req.URL.Path
 		handlerName := prepareHandlerName(path)
 
-		requestTimer := m.statsd.NewTiming()
+		requestTimer := s.client.NewTiming()
 
 		lrw := &LoggedResponseWriter{responseWriter: resp}
 
@@ -49,10 +46,11 @@ func (m *LogMiddleware) Log(handler http.Handler) http.Handler {
 			handlerName,
 		))
 
-		//Example: 200 POST /rec/ (127.0.0.1) 1.460s
-		log.Infof("%v %v %v (%v) %.3fs",
-			lrw.Status(), req.Method, path, req.RemoteAddr, requestTimer.Duration().Seconds())
-
+		if s.withLog {
+			//Example: 200 POST /rec/ (127.0.0.1) 1.460s
+			s.logger.Infof("%v %v %v (%v) %.3fs",
+				lrw.Status(), req.Method, path, req.RemoteAddr, requestTimer.Duration().Seconds())
+		}
 	})
 }
 
