@@ -17,6 +17,8 @@ type Strategy struct {
 	capsComparator capabilities.ComparatorInterface
 }
 
+const cleanupFailedPodsTimeout = time.Minute * 2
+
 func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, error) {
 	nodeConfig := s.findApplicableConfig(s.config.NodeList, desiredCaps)
 	if nodeConfig == nil {
@@ -32,7 +34,7 @@ func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, er
 	nodeAddress, err := s.provider.Create(podName, nodeConfig.Params)
 	if err != nil {
 		go func(podName string) {
-			time.Sleep(time.Minute * 2)
+			time.Sleep(cleanupFailedPodsTimeout)
 			_ = s.provider.Destroy(podName) // на случай если что то криво создалось
 		}(podName)
 		return pool.Node{}, errors.New("create node by provider, " + err.Error())

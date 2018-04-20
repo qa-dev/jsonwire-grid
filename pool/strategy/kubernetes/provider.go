@@ -98,12 +98,8 @@ LoopWaitSelenium:
 //Destroy - destroy all pod data (idempotent operation)
 func (p *kubDnsProvider) Destroy(podName string) error {
 	err := p.clientset.CoreV1Client.Pods(p.namespace).Delete(podName, &apiV1.DeleteOptions{})
-	switch {
-	case err != nil && strings.Contains(err.Error(), "not found"):
-		// pod already deleted
-	case err != nil:
-		err = errors.New("send command pod/delete to k8s, " + err.Error())
-		return err
+	if err != nil && !strings.Contains(err.Error(), "not found") {
+		return errors.New("send command pod/delete to k8s, " + err.Error())
 	}
 	return nil
 }
