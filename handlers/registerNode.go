@@ -50,9 +50,11 @@ func (h *RegisterNode) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	for i, value := range capabilitiesList {
 		poolCapabilitiesList[i] = capabilities.Capabilities(value)
 	}
+	hostPort := register.Configuration.Host + ":" + strconv.Itoa(register.Configuration.Port)
 	err = h.Pool.Add(
+		hostPort,
 		pool.NodeTypePersistent,
-		register.Configuration.Host+":"+strconv.Itoa(register.Configuration.Port),
+		hostPort,
 		poolCapabilitiesList,
 	)
 	if err != nil {

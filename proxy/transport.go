@@ -61,7 +61,7 @@ func (t *CreateSessionTransport) RoundTrip(request *http.Request) (*http.Respons
 		err = fmt.Errorf("session not created, response: %s", string(b))
 		return nil, err
 	}
-	log.Infof("register SessionID: %s on node %s", sessionID, t.node.Address)
+	log.Infof("register SessionID: %s on node %s", sessionID, t.node.Key)
 	err = t.pool.RegisterSession(t.node, sessionID)
 	if err != nil {
 		err = fmt.Errorf("sessionId not registred in storage: %s", sessionID)

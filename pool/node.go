@@ -18,6 +18,11 @@ const (
 )
 
 type Node struct {
+	// A unique key, by which we understand how to find this object in the outer world + for not adding the second time the same thing.
+	// The value may depend on the strategy:
+	// - for constant nodes ip: port
+	// - for temporary pod.name
+	Key             string
 	Type             NodeType
 	Address          string
 	Status           NodeStatus
@@ -28,10 +33,11 @@ type Node struct {
 }
 
 func (n *Node) String() string {
-	return "Node [" + n.Address + "]"
+	return "Node [" + n.Key + "]"
 }
 
 func NewNode(
+	key string,
 	t NodeType,
 	address string,
 	status NodeStatus,
@@ -41,6 +47,7 @@ func NewNode(
 	capabilitiesList []capabilities.Capabilities,
 ) *Node {
 	return &Node{
+		key,
 		t,
 		address,
 		status,

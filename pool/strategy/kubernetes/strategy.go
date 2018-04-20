@@ -6,8 +6,8 @@ import (
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"github.com/qa-dev/jsonwire-grid/pool/strategy"
 	"github.com/satori/go.uuid"
-	"net"
 	"time"
+	"fmt"
 )
 
 type Strategy struct {
@@ -17,6 +17,8 @@ type Strategy struct {
 	capsComparator capabilities.ComparatorInterface
 }
 
+const cleanupFailedPodsTimeout = time.Minute * 2
+
 func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, error) {
 	nodeConfig := s.findApplicableConfig(s.config.NodeList, desiredCaps)
 	if nodeConfig == nil {
@@ -24,17 +26,25 @@ func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, er
 	}
 	podName := "wd-node-" + uuid.NewV4().String()
 	ts := time.Now().Unix()
-	address := net.JoinHostPort(podName, nodeConfig.Params.Port)
-	node := pool.NewNode(pool.NodeTypeKubernetes, address, pool.NodeStatusReserved, "", ts, ts, []capabilities.Capabilities{})
+	node := pool.NewNode(podName, pool.NodeTypeKubernetes, "temp-value-replace-me", pool.NodeStatusReserved, "", ts, ts, []capabilities.Capabilities{})
 	err := s.storage.Add(*node, s.config.Limit)
 	if err != nil {
 		return pool.Node{}, errors.New("add node to storage, " + err.Error())
 	}
-	err = s.provider.Create(podName, nodeConfig.Params)
+	nodeAddress, err := s.provider.Create(podName, nodeConfig.Params)
 	if err != nil {
-		_ = s.provider.Destroy(podName) // на случай если что то успело создасться
+		go func(podName string) {
+			time.Sleep(cleanupFailedPodsTimeout)
+			_ = s.provider.Destroy(podName) // на случай если что то криво создалось
+		}(podName)
 		return pool.Node{}, errors.New("create node by provider, " + err.Error())
 	}
+
+	err = s.storage.UpdateAddress(*node, nodeAddress)
+	if err != nil {
+		return pool.Node{}, errors.New("update node address in storage, " + err.Error())
+	}
+	node.Address = nodeAddress
 	return *node, nil
 
 }
@@ -43,11 +53,10 @@ func (s *Strategy) CleanUp(node pool.Node) error {
 	if node.Type != pool.NodeTypeKubernetes {
 		return strategy.ErrNotApplicable
 	}
-	hostName, _, err := net.SplitHostPort(node.Address)
-	if err != nil {
-		return errors.New("get hostname from node.Address, " + err.Error())
+	if node.Key == "" {
+		return fmt.Errorf("empty node key")
 	}
-	err = s.provider.Destroy(hostName)
+	err := s.provider.Destroy(node.Key)
 	if err != nil {
 		return errors.New("destroy node by provider, " + err.Error())
 	}
@@ -62,11 +71,10 @@ func (s *Strategy) FixNodeStatus(node pool.Node) error {
 	if node.Type != pool.NodeTypeKubernetes {
 		return strategy.ErrNotApplicable
 	}
-	hostName, _, err := net.SplitHostPort(node.Address)
-	if err != nil {
-		return errors.New("get hostname from node.Address, " + err.Error())
+	if node.Key == "" {
+		return fmt.Errorf("empty node key")
 	}
-	err = s.provider.Destroy(hostName)
+	err := s.provider.Destroy(node.Key)
 	if err != nil {
 		return errors.New("destroy node by provider, " + err.Error())
 	}

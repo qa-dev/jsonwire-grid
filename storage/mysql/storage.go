@@ -13,6 +13,7 @@ import (
 
 type MysqlNodeModel struct {
 	ID         string `db:"id"`
+	Key        string `db:"key"`
 	Type       string `db:"type"`
 	Address    string `db:"address"`
 	Status     string `db:"status"`
@@ -23,7 +24,7 @@ type MysqlNodeModel struct {
 
 type MysqlCapabilitiesModel struct {
 	ID          int    `db:"id"`
-	NodeAddress string `db:"nodeAddress"`
+	NodeKey     string `db:"nodeKey"`
 	SetID       string `db:"setId"`
 	Name        string `db:"name"`
 	Value       string `db:"value"`
@@ -45,13 +46,14 @@ func (s *MysqlStorage) Add(node pool.Node, limit int) error {
 	}
 	// black magic, but it works
 	result, err := tx.NamedExec(
-		"INSERT INTO node (type, address, status, sessionId, updated, registred) "+
-			"SELECT :type, :address, :status, :sessionId, :updated, :registred "+
+		"INSERT INTO node (`key`, type, address, status, sessionId, updated, registred) "+
+			"SELECT :key, :type, :address, :status, :sessionId, :updated, :registred "+
 			"FROM DUAL "+
 			"WHERE 0 = :limit OR EXISTS (SELECT TRUE FROM node WHERE type = :type HAVING count(*) < :limit)"+
 			"ON DUPLICATE KEY UPDATE "+
-			"type = :type, status = :status, sessionId = :sessionId, updated = :updated, registred = :registred",
+			"type = :type, address = :address, status = :status, sessionId = :sessionId, updated = :updated, registred = :registred",
 		map[string]interface{}{
+			"key":      node.Key,
 			"type":      string(node.Type),
 			"address":   node.Address,
 			"sessionId": node.SessionID,
@@ -77,7 +79,7 @@ func (s *MysqlStorage) Add(node pool.Node, limit int) error {
 		return errors.New("[MysqlStorage/Add] No rows was affected (may be limit reached)")
 	}
 
-	_, err = tx.Exec("DELETE FROM capabilities WHERE nodeAddress = ?", node.Address)
+	_, err = tx.Exec("DELETE FROM capabilities WHERE nodeKey = ?", node.Key)
 	if err != nil {
 		_ = tx.Rollback()
 		return errors.New("[MysqlStorage/Add] delete old capabilities: " + err.Error())
@@ -87,8 +89,8 @@ func (s *MysqlStorage) Add(node pool.Node, limit int) error {
 	for i, caps := range node.CapabilitiesList {
 		for name, value := range caps {
 			preparedCapability = map[string]interface{}{
-				"nodeAddress": node.Address,
-				"setId":       node.Address + "|" + strconv.Itoa(i), // просто уникальное значение для сета
+				"nodeKey": node.Key,
+				"setId":       node.Key + "|" + strconv.Itoa(i), // просто уникальное значение для сета
 				"name":        name,
 				"value":       value,
 			}
@@ -98,8 +100,8 @@ func (s *MysqlStorage) Add(node pool.Node, limit int) error {
 
 	for _, preparedCapability := range preparedCapabilities {
 		_, err = tx.NamedExec(
-			"INSERT INTO capabilities (nodeAddress, setId, name, value) "+
-				"VALUES (:nodeAddress, :setId, :name, :value)",
+			"INSERT INTO capabilities (nodeKey, setId, name, value) "+
+				"VALUES (:nodeKey, :setId, :name, :value)",
 			preparedCapability,
 		)
 		if err != nil {
@@ -122,15 +124,15 @@ func (s *MysqlStorage) ReserveAvailable(nodeList []pool.Node) (pool.Node, error)
 		return pool.Node{}, errors.New("[MysqlStorage/ReserveAvailable] start transaction: " + err.Error())
 	}
 
-	nodeAddressList := make([]string, 0, len(nodeList))
+	nodeKeyList := make([]string, 0, len(nodeList))
 	for _, node := range nodeList {
-		nodeAddressList = append(nodeAddressList, node.Address)
+		nodeKeyList = append(nodeKeyList, node.Key)
 	}
-	args := []interface{}{string(pool.NodeStatusAvailable), nodeAddressList}
+	args := []interface{}{string(pool.NodeStatusAvailable), nodeKeyList}
 
 	//var row *sqlx.Row
 	query, args, err := sqlx.In(
-		"SELECT n.* FROM node n WHERE n.status = ? AND n.address IN (?) ORDER BY n.updated ASC LIMIT 1 FOR UPDATE;", args...)
+		"SELECT n.* FROM node n WHERE n.status = ? AND n.`key` IN (?) ORDER BY n.updated ASC LIMIT 1 FOR UPDATE;", args...)
 	if err != nil {
 		return pool.Node{}, errors.New("[MysqlStorage/ReserveAvailable] make select query: " + err.Error())
 	}
@@ -152,10 +154,10 @@ func (s *MysqlStorage) ReserveAvailable(nodeList []pool.Node) (pool.Node, error)
 	nodeModel.Updated = time.Now().Unix()
 	nodeModel.Status = string(pool.NodeStatusReserved)
 	res, err := tx.Exec(
-		"UPDATE node SET status = ?, updated = ? WHERE address = ?",
+		"UPDATE node SET status = ?, updated = ? WHERE `key` = ?",
 		nodeModel.Status,
 		nodeModel.Updated,
-		nodeModel.Address,
+		nodeModel.Key,
 	)
 	if err != nil {
 		_ = tx.Rollback()
@@ -181,11 +183,11 @@ func (s *MysqlStorage) ReserveAvailable(nodeList []pool.Node) (pool.Node, error)
 
 func (s *MysqlStorage) SetBusy(node pool.Node, sessionID string) error {
 	res, err := s.db.Exec(
-		"UPDATE node SET sessionID = ?, updated = ?, status = ? WHERE address = ?",
+		"UPDATE node SET sessionID = ?, updated = ?, status = ? WHERE `key` = ?",
 		sessionID,
 		time.Now().Unix(),
 		string(pool.NodeStatusBusy),
-		node.Address,
+		node.Key,
 	)
 	if err != nil {
 		return errors.New("[MysqlStorage/SetBusy] update table `node`, " + err.Error())
@@ -202,10 +204,10 @@ func (s *MysqlStorage) SetBusy(node pool.Node, sessionID string) error {
 
 func (s *MysqlStorage) SetAvailable(node pool.Node) error {
 	res, err := s.db.Exec(
-		"UPDATE node SET status = ?, updated = ?  WHERE address = ?",
+		"UPDATE node SET status = ?, updated = ?  WHERE `key` = ?",
 		string(pool.NodeStatusAvailable),
 		time.Now().Unix(),
-		node.Address,
+		node.Key,
 	)
 	if err != nil {
 		err = errors.New("[MysqlStorage/SetAvailable] update table `node`, " + err.Error())
@@ -282,21 +284,21 @@ func (s *MysqlStorage) GetAll() ([]pool.Node, error) {
 		return nil, errors.New("[MysqlStorage/GetAll] get all capabilities from db, " + err.Error())
 	}
 	for _, row := range rowsCaps {
-		_, ok := capsMap[row.NodeAddress]
+		_, ok := capsMap[row.NodeKey]
 		if !ok {
-			capsMap[row.NodeAddress] = map[string]capabilities.Capabilities{}
+			capsMap[row.NodeKey] = map[string]capabilities.Capabilities{}
 		}
-		currCaps, ok := capsMap[row.NodeAddress][row.SetID]
+		currCaps, ok := capsMap[row.NodeKey][row.SetID]
 		if !ok {
 			currCaps = capabilities.Capabilities{}
 		}
 		currCaps[row.Name] = row.Value
-		capsMap[row.NodeAddress][row.SetID] = currCaps
+		capsMap[row.NodeKey][row.SetID] = currCaps
 	}
 
 	for i, node := range nodeList {
-		capsList := make([]capabilities.Capabilities, 0, len(capsMap[node.Address]))
-		for _, currCaps := range capsMap[node.Address] {
+		capsList := make([]capabilities.Capabilities, 0, len(capsMap[node.Key]))
+		for _, currCaps := range capsMap[node.Key] {
 			capsList = append(capsList, currCaps)
 		}
 		nodeList[i].CapabilitiesList = capsList
@@ -306,7 +308,7 @@ func (s *MysqlStorage) GetAll() ([]pool.Node, error) {
 }
 
 func (s *MysqlStorage) Remove(node pool.Node) error {
-	res, err := s.db.Exec("DELETE FROM node WHERE address = ?", node.Address)
+	res, err := s.db.Exec("DELETE FROM node WHERE `key` = ?", node.Key)
 	if err != nil {
 		return errors.New("[MysqlStorage/Remove] delete from table `node`, " + err.Error())
 	}
@@ -317,7 +319,7 @@ func (s *MysqlStorage) Remove(node pool.Node) error {
 	if rowsAffected == 0 {
 		return errors.New("[MysqlStorage/Remove] delete from node: affected 0 rows")
 	}
-	res, err = s.db.Exec("DELETE FROM capabilities WHERE nodeAddress = ?", node.Address)
+	res, err = s.db.Exec("DELETE FROM capabilities WHERE `nodeKey` = ?", node.Key)
 	if err != nil {
 		return errors.New("[MysqlStorage/Remove] delete from table `capabilities`: " + err.Error())
 	}
@@ -331,8 +333,30 @@ func (s *MysqlStorage) Remove(node pool.Node) error {
 	return nil
 }
 
+func (s *MysqlStorage) UpdateAddress(node pool.Node, newAddress string) error {
+	res, err := s.db.Exec(
+		"UPDATE node SET address = ? WHERE `key` = ?",
+		newAddress,
+		node.Key,
+	)
+	if err != nil {
+		err = errors.New("[MysqlStorage/UpdateAddress] update table `node`, " + err.Error())
+		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		err = errors.New("[MysqlStorage/UpdateAddress] get affected rows, " + err.Error())
+		return err
+	}
+	if rowsAffected == 0 {
+		return storage.ErrNotFound
+	}
+	return nil
+}
+
 func mapper(model *MysqlNodeModel) *pool.Node {
 	node := pool.NewNode(
+		model.Key,
 		pool.NodeType(model.Type),
 		model.Address,
 		pool.NodeStatus(model.Status),

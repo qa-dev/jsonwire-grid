@@ -20,7 +20,7 @@ func TestStrategyList_Reserve_PositiveDirectOrder(t *testing.T) {
 	s1 := new(StrategyListMock)
 	s1.On("Reserve", mock.AnythingOfType("capabilities.Capabilities")).Return(Node{}, strategy.ErrNotFound)
 	s2 := new(StrategyListMock)
-	expectedNode := *NewNode(NodeTypePersistent, "111", NodeStatusBusy, "", time.Now().Unix(), 0, []capabilities.Capabilities{})
+	expectedNode := *NewNode("123", NodeTypePersistent, "111", NodeStatusBusy, "", time.Now().Unix(), 0, []capabilities.Capabilities{})
 	s2.On("Reserve", mock.AnythingOfType("capabilities.Capabilities")).Return(expectedNode, nil)
 
 	sl := NewStrategyList([]StrategyInterface{s1, s2})
@@ -31,7 +31,7 @@ func TestStrategyList_Reserve_PositiveDirectOrder(t *testing.T) {
 
 func TestStrategyList_Reserve_Positive_ReverseOrder(t *testing.T) {
 	s1 := new(StrategyListMock)
-	expectedNode := *NewNode(NodeTypePersistent, "111", NodeStatusBusy, "", time.Now().Unix(), 0, []capabilities.Capabilities{})
+	expectedNode := *NewNode("123", NodeTypePersistent, "111", NodeStatusBusy, "", time.Now().Unix(), 0, []capabilities.Capabilities{})
 	s1.On("Reserve", mock.AnythingOfType("capabilities.Capabilities")).Return(expectedNode, nil)
 	s2 := new(StrategyListMock)
 	s2.On("Reserve", mock.AnythingOfType("capabilities.Capabilities")).Return(Node{}, strategy.ErrNotFound)

@@ -1,6 +1,7 @@
 package tests
 
 import (
+	storageLib "github.com/qa-dev/jsonwire-grid/storage"
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"github.com/stretchr/testify/assert"
@@ -22,6 +23,7 @@ func testStorage_Add(t *testing.T, p PrepareInterface) {
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
 	expectedNode := pool.Node{
+		Key: "111",
 		Address: "address1",
 		CapabilitiesList: []capabilities.Capabilities{
 			{"trololo": "lolo"},
@@ -38,6 +40,7 @@ func testStorage_Add(t *testing.T, p PrepareInterface) {
 		t.Fatal("Error get all nodes list, " + err.Error())
 	}
 	assert.Len(t, nodeList, 1, "Added more than one node")
+	assert.Equal(t, expectedNode.Key, nodeList[0].Key)
 	assert.Equal(t, expectedNode.Type, nodeList[0].Type)
 	assert.Equal(t, expectedNode.Address, nodeList[0].Address)
 	assert.Equal(t, expectedNode.Status, nodeList[0].Status)
@@ -53,6 +56,7 @@ func testStorage_Add_Repeat(t *testing.T, p PrepareInterface) {
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
 	node := pool.Node{
+		Key:          "ololo",
 		Address:          "ololo",
 		CapabilitiesList: []capabilities.Capabilities{{"trololo": "lolo"}},
 	}
@@ -74,6 +78,7 @@ func testStorage_Add_Limit_Overflow(t *testing.T, p PrepareInterface) {
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
 	node := pool.Node{
+		Key:          "ololo",
 		Address:          "ololo",
 		CapabilitiesList: []capabilities.Capabilities{{"trololo": "lolo"}},
 		Type:             pool.NodeTypePersistent,
@@ -81,7 +86,7 @@ func testStorage_Add_Limit_Overflow(t *testing.T, p PrepareInterface) {
 	limit := 1
 	err := storage.Add(node, limit)
 	assert.Nil(t, err)
-	node.Address = "ololo1"
+	node.Key = "ololo1"
 	err = storage.Add(node, limit)
 	assert.NotNil(t, err)
 	nodeList, err := storage.GetAll()
@@ -97,6 +102,7 @@ func testStorage_GetAll(t *testing.T, p PrepareInterface) {
 	expectedNodeList := make([]pool.Node, 0)
 	for _, addr := range []string{"addr1", "addr2"} {
 		node := pool.Node{
+			Key: addr,
 			Address:          addr,
 			CapabilitiesList: []capabilities.Capabilities{{"trololo": "lolo"}},
 		}
@@ -112,7 +118,7 @@ func testStorage_GetAll(t *testing.T, p PrepareInterface) {
 	for _, expectedNode := range expectedNodeList {
 		isNodeMatch := false
 		for _, node := range nodeList {
-			if node.Address == expectedNode.Address {
+			if node.Key == expectedNode.Key {
 				assert.Equal(t, expectedNode.Type, node.Type)
 				assert.Equal(t, expectedNode.Address, node.Address)
 				assert.Equal(t, expectedNode.Status, node.Status)
@@ -133,7 +139,7 @@ func testStorage_GetByAddress(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
-	expectedNode := pool.Node{Address: "mySuperAddress"}
+	expectedNode := pool.Node{Address: "mySuperAddress", Key: "mySuperAddress"}
 	err := storage.Add(expectedNode, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
@@ -154,13 +160,14 @@ func testStorage_GetBySession(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
-	expectedNode := pool.Node{Address: "mySuperAddress"}
+	expectedNode := pool.Node{Address: "mySuperAddress", Key: "mySuperAddress"}
 	err := storage.Add(expectedNode, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
 	}
 	node, err := storage.GetBySession(expectedNode.SessionID)
 	assert.Nil(t, err)
+	assert.Equal(t, expectedNode.Key, node.Key)
 	assert.Equal(t, expectedNode.Type, node.Type)
 	assert.Equal(t, expectedNode.Address, node.Address)
 	assert.Equal(t, expectedNode.Status, node.Status)
@@ -175,15 +182,15 @@ func testStorage_GetCountWithStatus(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
-	err := storage.Add(pool.Node{Status: pool.NodeStatusAvailable, Address: "1"}, 0)
+	err := storage.Add(pool.Node{Status: pool.NodeStatusAvailable, Address: "1", Key: "1"}, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
 	}
-	err = storage.Add(pool.Node{Status: pool.NodeStatusAvailable, Address: "2"}, 0)
+	err = storage.Add(pool.Node{Status: pool.NodeStatusAvailable, Address: "2", Key: "2"}, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
 	}
-	err = storage.Add(pool.Node{Status: pool.NodeStatusBusy, Address: "3"}, 0)
+	err = storage.Add(pool.Node{Status: pool.NodeStatusBusy, Address: "3", Key: "3"}, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
 	}
@@ -198,7 +205,7 @@ func testStorage_Remove(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
-	node := pool.Node{Status: pool.NodeStatusAvailable, Address: "1", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
+	node := pool.Node{Key: "123", Status: pool.NodeStatusAvailable, Address: "1", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
 	err := storage.Add(node, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
@@ -214,12 +221,12 @@ func testStorage_ReserveAvailable_Positive(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
-	node := pool.Node{Status: pool.NodeStatusAvailable, Address: "1", CapabilitiesList: []capabilities.Capabilities{{"cap1": "val1"}}}
+	node := pool.Node{Key: "123", Status: pool.NodeStatusAvailable, Address: "1", CapabilitiesList: []capabilities.Capabilities{{"cap1": "val1"}}}
 	err := storage.Add(node, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
 	}
-	expectedNode := pool.Node{Status: pool.NodeStatusAvailable, Address: "2", CapabilitiesList: []capabilities.Capabilities{{"cap1": "val1", "cap2": "val2"}}}
+	expectedNode := pool.Node{Key: "123", Status: pool.NodeStatusAvailable, Address: "2", CapabilitiesList: []capabilities.Capabilities{{"cap1": "val1", "cap2": "val2"}}}
 	err = storage.Add(expectedNode, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
@@ -227,7 +234,7 @@ func testStorage_ReserveAvailable_Positive(t *testing.T, p PrepareInterface) {
 	node, err = storage.ReserveAvailable([]pool.Node{expectedNode})
 	assert.Nil(t, err)
 	assert.Equal(t, pool.NodeStatusReserved, node.Status, "Node not Reserved")
-	assert.Equal(t, expectedNode.Address, node.Address, "Reserved unexpected node")
+	assert.Equal(t, expectedNode.Key, node.Key, "Reserved unexpected node")
 	node, err = storage.GetByAddress(node.Address)
 	if err != nil {
 		t.Fatal("Error get node, " + err.Error())
@@ -240,12 +247,12 @@ func testStorage_ReserveAvailable_Negative(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
-	node := pool.Node{Status: pool.NodeStatusBusy, Address: "qqqqqq", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
+	node := pool.Node{Key: "123", Status: pool.NodeStatusBusy, Address: "qqqqqq", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
 	err := storage.Add(node, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
 	}
-	node, err = storage.ReserveAvailable([]pool.Node{{Address: "qqqqqq"}})
+	node, err = storage.ReserveAvailable([]pool.Node{{Key: "qqqqqq"}})
 	assert.Error(t, err)
 }
 
@@ -254,7 +261,7 @@ func testStorage_SetAvailable(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
-	node := pool.Node{Status: pool.NodeStatusBusy, Address: "qqqqqq", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
+	node := pool.Node{Key: "123", Status: pool.NodeStatusBusy, Address: "qqqqqq", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
 	err := storage.Add(node, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
@@ -273,7 +280,7 @@ func testStorage_SetBusy(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
-	node := pool.Node{Status: pool.NodeStatusAvailable, Address: "qqqqqq", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
+	node := pool.Node{Key: "123", Status: pool.NodeStatusAvailable, Address: "qqqqqq", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
 	err := storage.Add(node, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
@@ -287,4 +294,38 @@ func testStorage_SetBusy(t *testing.T, p PrepareInterface) {
 	}
 	assert.Equal(t, pool.NodeStatusBusy, node.Status, "Node not Busy")
 	assert.Equal(t, expectedSessionID, node.SessionID, "Not saved sessionID")
+}
+
+// testStorage_UpdateAdderss_UpdatesValue успешное обновления адреса ноды
+func testStorage_UpdateAdderss_UpdatesValue(t *testing.T, p PrepareInterface) {
+	t.Parallel()
+	storage, deferFunc := p.CreateStorage()
+	defer deferFunc()
+	node := pool.Node{SessionID: "sess", Key: "123", Status: pool.NodeStatusAvailable, Address: "qqqqqq", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
+	err := storage.Add(node, 0)
+	if err != nil {
+		t.Fatal("Error add node, " + err.Error())
+	}
+	expectedAddress := "newAddressId"
+	err = storage.UpdateAddress(node, expectedAddress)
+	assert.Nil(t, err)
+	node, err = storage.GetBySession("sess")
+	if err != nil {
+		t.Fatal("Error add node, " + err.Error())
+	}
+	assert.Equal(t, expectedAddress, node.Address, "Not updated address")
+}
+
+// testStorage_UpdateAdderss_ReturnsErrNotFound попытка обновить несуществующую ноду
+func testStorage_UpdateAdderss_ReturnsErrNotFound(t *testing.T, p PrepareInterface) {
+	t.Parallel()
+	storage, deferFunc := p.CreateStorage()
+	defer deferFunc()
+	node := pool.Node{SessionID: "sess", Key: "123", Status: pool.NodeStatusAvailable, Address: "qqqqqq", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
+	err := storage.Add(pool.Node{Key:"12345"}, 0)
+	if err != nil {
+		t.Fatal("Error add node, " + err.Error())
+	}
+	err = storage.UpdateAddress(node, "trololo")
+	assert.Equal(t, storageLib.ErrNotFound, err)
 }

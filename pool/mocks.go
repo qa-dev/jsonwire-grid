@@ -72,3 +72,8 @@ func (s *StrategyListMock) FixNodeStatus(node Node) error {
 	args := s.Called(node)
 	return args.Error(0)
 }
+
+func (s *StorageMock) UpdateAddress(node Node, newAddress string) error {
+	args := s.Called(node, newAddress)
+	return args.Error(0)
+}

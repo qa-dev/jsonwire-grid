@@ -9,20 +9,24 @@ import (
 	"net"
 	"strconv"
 	"time"
+	"strings"
+	"fmt"
 )
 
 type kubernetesProviderInterface interface {
-	Create(podName string, nodeParams nodeParams) error
+	Create(podName string, nodeParams nodeParams) (nodeAddress string, err error)
+	// idempotent operation
 	Destroy(podName string) error
 }
 
-type kubernetesProvider struct {
+type kubDnsProvider struct {
 	clientset     *kubernetes.Clientset
 	namespace     string
+	podCreationTimeout     time.Duration
 	clientFactory jsonwire.ClientFactoryInterface
 }
 
-func (p *kubernetesProvider) Create(podName string, nodeParams nodeParams) error {
+func (p *kubDnsProvider) Create(podName string, nodeParams nodeParams) (nodeAddress string, err error) {
 	pod := &apiV1.Pod{}
 	pod.ObjectMeta.Name = podName
 	pod.ObjectMeta.Labels = map[string]string{"name": podName}
@@ -32,37 +36,50 @@ func (p *kubernetesProvider) Create(podName string, nodeParams nodeParams) error
 	container.Image = nodeParams.Image
 	port, err := strconv.Atoi(nodeParams.Port)
 	if err != nil {
-		return errors.New("convert to int nodeParams.Port, " + err.Error())
+		return "", errors.New("convert to int nodeParams.Port, " + err.Error())
 	}
 	container.Ports = []apiV1.ContainerPort{{ContainerPort: int32(port)}}
 	pod.Spec.Containers = append(pod.Spec.Containers, container)
 	_, err = p.clientset.CoreV1Client.Pods(p.namespace).Create(pod)
 	if err != nil {
-		return errors.New("send command pod/create to k8s, " + err.Error())
+		return "", errors.New("send command pod/create to k8s, " + err.Error())
 	}
 
-	service := &apiV1.Service{}
-	service.ObjectMeta.Name = podName
-	service.Spec.ClusterIP = "None"
-	service.Spec.Ports = []apiV1.ServicePort{{Port: int32(port)}}
-	service.Spec.Selector = map[string]string{"name": podName}
-	_, err = p.clientset.CoreV1Client.Services(p.namespace).Create(service)
-	if err != nil {
-		return errors.New("send command service/create to k8s, " + err.Error())
-	}
-
-	// todo: пока так ожидаем поднятие ноды, так как не понятно что конкретно означают статусы возвращаемые через апи
-	client := p.clientFactory.Create(net.JoinHostPort(podName, nodeParams.Port))
-	stop := time.After(40 * time.Second)
-	log.Debugln("start waiting")
-Loop:
+	stop := time.After(p.podCreationTimeout)
+	log.Debugf("start waiting pod ip")
+	var createdPodIP string
+LoopWaitIP:
 	for {
 		select {
 		case <-stop:
-			return errors.New("wait stopped by timeout")
+			return "", fmt.Errorf("wait podIP stopped by timeout, %v", podName)
 		default:
 			time.Sleep(time.Second)
-			log.Debugln("start request")
+			createdPod, err := p.clientset.CoreV1Client.Pods(p.namespace).Get(podName)
+			if err != nil {
+				log.Debugf("fail get created pod, %v, %v",podName, err)
+				continue
+			}
+			if createdPod.Status.PodIP == "" {
+				log.Debugf("empty pod ip, %v", podName)
+				continue
+			}
+			createdPodIP = createdPod.Status.PodIP
+			break LoopWaitIP
+		}
+	}
+
+	// todo: пока так ожидаем поднятие ноды, так как не понятно что конкретно означают статусы возвращаемые через апи
+	nodeAddress = net.JoinHostPort(createdPodIP, nodeParams.Port)
+	client := p.clientFactory.Create(nodeAddress)
+	log.Debugln("start waiting selenium")
+LoopWaitSelenium:
+	for {
+		select {
+		case <-stop:
+			return "", fmt.Errorf("wait selenium stopped by timeout, %v", podName)
+		default:
+			time.Sleep(time.Second)
 			message, err := client.Health()
 			if err != nil {
 				log.Debugf("fail request, %v", err)
@@ -70,24 +87,19 @@ Loop:
 			}
 			log.Debugf("done request, status: %v", message.Status)
 			if message.Status == 0 {
-				break Loop
+				break LoopWaitSelenium
 			}
 		}
 	}
 
-	return nil
+	return nodeAddress, nil
 }
 
-func (p *kubernetesProvider) Destroy(podName string) error {
+//Destroy - destroy all pod data (idempotent operation)
+func (p *kubDnsProvider) Destroy(podName string) error {
 	err := p.clientset.CoreV1Client.Pods(p.namespace).Delete(podName, &apiV1.DeleteOptions{})
-	if err != nil {
-		err = errors.New("send command pod/delete to k8s, " + err.Error())
-		return err
-	}
-	err = p.clientset.CoreV1Client.Services(p.namespace).Delete(podName, &apiV1.DeleteOptions{})
-	if err != nil {
-		err = errors.New("send command service/delete to k8s, " + err.Error())
-		return err
+	if err != nil && !strings.Contains(err.Error(), "not found") {
+		return errors.New("send command pod/delete to k8s, " + err.Error())
 	}
 	return nil
 }

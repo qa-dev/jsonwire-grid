@@ -25,6 +25,7 @@ type StorageInterface interface {
 	GetByAddress(string) (Node, error)
 	GetAll() ([]Node, error)
 	Remove(Node) error
+	UpdateAddress(node Node, newAddress string) error
 }
 
 type StrategyInterface interface {
@@ -68,12 +69,12 @@ func (p *Pool) ReserveAvailableNode(caps capabilities.Capabilities) (*Node, erro
 	return &node, err
 }
 
-func (p *Pool) Add(t NodeType, address string, capabilitiesList []capabilities.Capabilities) error {
+func (p *Pool) Add(key string, t NodeType, address string, capabilitiesList []capabilities.Capabilities) error {
 	if len(capabilitiesList) == 0 {
 		return errors.New("[Pool/Add] Capabilities must contains more one element")
 	}
 	ts := time.Now().Unix()
-	return p.storage.Add(*NewNode(t, address, NodeStatusAvailable, "", ts, ts, capabilitiesList), 0)
+	return p.storage.Add(*NewNode(key, t, address, NodeStatusAvailable, "", ts, ts, capabilitiesList), 0)
 }
 
 func (p *Pool) RegisterSession(node *Node, sessionID string) error {
@@ -148,7 +149,7 @@ func (p *Pool) FixNodeStatuses() {
 			continue
 		}
 		if isFixed {
-			log.Infof("Node [%s] status fixed", node.Address)
+			log.Infof("Node [%s] status fixed", node.Key)
 		}
 	}
 }
@@ -169,7 +170,7 @@ func (p *Pool) fixNodeStatus(node *Node) (bool, error) {
 	}
 	err := p.strategyList.FixNodeStatus(*node)
 	if err != nil {
-		return false, fmt.Errorf("Can't fix node [%s] status, %s", node.Address, err.Error())
+		return false, fmt.Errorf("Can't fix node [%s] status, %s", node.Key, err.Error())
 	}
 	return true, nil
 }
