@@ -72,7 +72,7 @@ Configurations are stored in json files. Example:
 | mysql             | [spec](https://github.com/go-sql-driver/mysql#dsn-data-source-name), example `db_user:db_pass@(db_host:3306)/db_name?parseTime=true` (parseTime=true - required option) |
 | local             | omit this property, because every instance have its own in-memory storage                                                                                               |
 
-### Statsd - Configuration of metrics.
+### Statsd - Configuration of metrics(optional).
 | Option          | Possible values | Description            |
 | --------------- | --------------- | ---------------------- |
 | statsd.host     | `string`        | Host of statsd server. |
