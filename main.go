@@ -102,7 +102,8 @@ func main() {
 			cfg.Statsd.Protocol,
 			cfg.Statsd.Prefix,
 			cfg.Statsd.Enable)
-		poolMetricsSender := poolMetrics.NewSender(statsdClient, poolInstance, time.Second*1) // todo: move to config
+		// todo: move to config
+		poolMetricsSender := poolMetrics.NewSender(statsdClient, poolInstance, time.Second*1, cfg.Statsd.CapabilitiesList, capsComparator)
 		go poolMetricsSender.SendAll()
 		if err != nil {
 			log.Errorf("Statsd create socked error: %s", err)

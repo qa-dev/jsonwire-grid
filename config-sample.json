@@ -57,6 +57,9 @@
     "port": 8126,
     "protocol": "udp",
     "prefix": "products.tests.qa.debug-dev.jsonwire-grid.",
-    "enable": false
+    "enable": false,
+    "selectors": [
+      {"tag": "chrome", "capabilities": {"browserName": "chrome"}}
+    ]
   }
 }

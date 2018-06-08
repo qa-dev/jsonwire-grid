@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	log "github.com/Sirupsen/logrus"
+	"github.com/qa-dev/jsonwire-grid/pool/metrics"
 	"os"
 )
 
@@ -52,11 +53,12 @@ type DB struct {
 
 // Statsd - Settings of metrics sender.
 type Statsd struct {
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	Protocol string `json:"protocol"`
-	Prefix   string `json:"prefix"`
-	Enable   bool   `json:"enable"`
+	Host             string                         `json:"host"`
+	Port             int                            `json:"port"`
+	Protocol         string                         `json:"protocol"`
+	Prefix           string                         `json:"prefix"`
+	Enable           bool                           `json:"enable"`
+	CapabilitiesList []metrics.CapabilitiesSelector `json:"selectors"`
 }
 
 // New - Constructor of config.
