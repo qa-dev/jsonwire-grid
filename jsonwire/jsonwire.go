@@ -30,9 +30,11 @@ type Sessions struct {
 
 // Register - message structure for registration new node.
 type Register struct {
-	Class            string         `json:"class,omitempty"`
-	Configuration    *Configuration `json:"configuration,omitempty"`
-	CapabilitiesList []Capabilities `json:"capabilities,omitempty"` // selenium 3
+	Class            json.RawMessage `json:"class,omitempty"`
+	Configuration    *Configuration  `json:"configuration,omitempty"`
+	CapabilitiesList []Capabilities  `json:"capabilities,omitempty"` // selenium 3
+	Description		 string			 `json:"description,omitempty"`
+	Name		 	 string			 `json:"name,omitempty"`
 }
 
 // Capabilities - structure of supported capabilities.
