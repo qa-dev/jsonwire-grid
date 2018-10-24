@@ -8,7 +8,7 @@ import (
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type StrategyFactory struct {

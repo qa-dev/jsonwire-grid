@@ -15,12 +15,6 @@
 			"revision": ""
 		},
 		{
-			"checksumSHA1": "ZKxETlJdB2XubMrZnXB0FQimVA8=",
-			"path": "github.com/Sirupsen/logrus",
-			"revision": "10f801ebc38b33738c9d17d50860f484a0988ff5",
-			"revisionTime": "2017-03-17T14:32:14Z"
-		},
-		{
 			"checksumSHA1": "4tTcNh86OwCSkCD6WeA6ajRYqDA=",
 			"path": "github.com/coreos/go-oidc/jose",
 			"revision": "d68c0e2fef598f5bbf15edd34905f4bf551a54ec",
@@ -119,6 +113,12 @@
 			"revisionTime": "2016-09-07T12:20:59Z"
 		},
 		{
+			"checksumSHA1": "r6ZMyP/HsdeToXIxvgP3ntL6Bds=",
+			"path": "github.com/konsorten/go-windows-terminal-sequences",
+			"revision": "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242",
+			"revisionTime": "2018-10-04T22:41:46Z"
+		},
+		{
 			"checksumSHA1": "0HClWQEXADd0vPG7wcVYKXnCuI0=",
 			"path": "github.com/rubenv/sql-migrate",
 			"revision": "42c30aabf72921b83678a3d0680fd6cd46682f1b",
@@ -135,6 +135,12 @@
 			"path": "github.com/satori/go.uuid",
 			"revision": "5bf94b69c6b68ee1b541973bb8e1144db23a194b",
 			"revisionTime": "2017-03-21T23:07:31Z"
+		},
+		{
+			"checksumSHA1": "1dd8tjW3xNUE6wV1T42Tmw/JN/s=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "4fabf2fffcecfd47f802869b7b92d75e43c5a095",
+			"revisionTime": "2018-10-21T10:09:20Z"
 		},
 		{
 			"checksumSHA1": "K0crHygPTP42i1nLKWphSlvOQJw=",

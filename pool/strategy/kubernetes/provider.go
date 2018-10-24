@@ -2,7 +2,7 @@ package kubernetes
 
 import (
 	"errors"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"k8s.io/client-go/kubernetes"
 	apiV1 "k8s.io/client-go/pkg/api/v1"

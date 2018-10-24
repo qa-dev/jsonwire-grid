@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/qa-dev/jsonwire-grid/config"
 	"github.com/qa-dev/jsonwire-grid/handlers"
 	"github.com/qa-dev/jsonwire-grid/logger"

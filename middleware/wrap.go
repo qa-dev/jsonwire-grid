@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 	"runtime/debug"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 type Wrap struct {
