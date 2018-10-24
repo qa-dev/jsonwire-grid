@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"gopkg.in/alexcesaro/statsd.v2"

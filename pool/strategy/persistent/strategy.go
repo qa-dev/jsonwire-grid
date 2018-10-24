@@ -2,7 +2,7 @@ package persistent
 
 import (
 	"errors"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
@@ -45,10 +45,10 @@ func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, er
 		client := s.clientFactory.Create(node.Address)
 		message, err := client.Health()
 		if err != nil {
-			log.Infof("Remove unavailable node [%s], %s", node, err)
+			log.Infof("Remove unavailable node [%s], %s", &node, err)
 			err = s.storage.Remove(node)
 			if err != nil {
-				log.Errorf("Remove unavailable node [%s], %s", node, err)
+				log.Errorf("Remove unavailable node [%s], %s", &node, err)
 			}
 			continue
 		}
@@ -62,7 +62,7 @@ func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, er
 		//todo: посылать в мониторинг событие, если вернулся не 0
 		_, err = seleniumNode.removeAllSessions()
 		if err != nil {
-			log.Warningf("remove all existing sessions from node [%v], [%v]", node, err)
+			log.Warningf("remove all existing sessions from node [%s], [%v]", &node, err)
 			continue
 		}
 

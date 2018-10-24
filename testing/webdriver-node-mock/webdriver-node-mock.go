@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"io/ioutil"
 	"math/rand"

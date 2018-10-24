@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	"fmt"
 	"github.com/qa-dev/jsonwire-grid/config"

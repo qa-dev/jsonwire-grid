@@ -3,7 +3,7 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/qa-dev/jsonwire-grid/pool/metrics"
 	"os"
 )
