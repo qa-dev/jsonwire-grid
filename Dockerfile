@@ -1,4 +1,4 @@
-FROM golang:1.8.1
+FROM golang:1.11.1
 
 COPY ./  ${GOPATH}/src/github.com/qa-dev/jsonwire-grid/
 
