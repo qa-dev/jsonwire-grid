@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: jsonwire-grid
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      service: jsonwire-grid
+      app: jsonwire-grid
+  template:
+    metadata:
+      labels:
+        service: jsonwire-grid
+        app: jsonwire-grid
+    spec:
+      containers:
+        - name: jsonwire-grid
+          imagePullPolicy: IfNotPresent
+          image: registry-dev.k.avito.ru/test/jsonwire-grid:latest3
+          ports:
+            - containerPort: 4444

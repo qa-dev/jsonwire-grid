@@ -1,0 +1,7 @@
+FROM golang:1.8
+
+COPY . ${GOPATH}/src/github.com/qa-dev/jsonwire-grid/
+
+RUN go install github.com/qa-dev/jsonwire-grid/testing/webdriver-node-mock
+
+CMD ["webdriver-node-mock"]
