@@ -5,7 +5,9 @@ go:
 
 install: make get-deps prepare
 script:
-  - make test
+  - go test ./... -coverprofile=coverage.txt -covermode=atomic
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 services:
   - mysql
 
