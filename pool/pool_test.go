@@ -299,4 +299,18 @@ func TestPool_fixNodeStatus_NegativeReserved(t *testing.T) {
 	a.Error(err)
 }
 
+func TestPool_SetBusyNodeDuration(t *testing.T) {
+	expected := time.Second
+	p := NewPool(nil, nil)
+	p.SetBusyNodeDuration(expected)
+	assert.Equal(t, expected, p.busyNodeDuration)
+}
+
+func TestPool_SetReservedNodeDuration(t *testing.T) {
+	expected := time.Second
+	p := NewPool(nil, nil)
+	p.SetReservedNodeDuration(expected)
+	assert.Equal(t, expected, p.reservedNodeDuration)
+}
+
 //---------------------------------

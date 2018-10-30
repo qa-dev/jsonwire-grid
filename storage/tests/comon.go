@@ -16,8 +16,8 @@ type PrepareInterface interface {
 	CreateStorage() (pool.StorageInterface, func())
 }
 
-// testStorage_Add проверка корректости добавления ноды в хранилище
-func testStorage_Add(t *testing.T, p PrepareInterface) {
+// TestStorage_Add проверка корректости добавления ноды в хранилище
+func TestStorage_Add(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 
 	storage, deferFunc := p.CreateStorage()
@@ -50,8 +50,8 @@ func testStorage_Add(t *testing.T, p PrepareInterface) {
 	//assert.Equal(t, expectedNode.CapabilitiesList, nodeList[0].CapabilitiesList) //todo: доделать
 }
 
-// testStorage_Add_Repeat проверка того что при повторном добавлении ноды вместо дублирования происходит корректный апдейт
-func testStorage_Add_Repeat(t *testing.T, p PrepareInterface) {
+// TestStorage_Add_Repeat проверка того что при повторном добавлении ноды вместо дублирования происходит корректный апдейт
+func TestStorage_Add_Repeat(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -72,8 +72,8 @@ func testStorage_Add_Repeat(t *testing.T, p PrepareInterface) {
 	//todo: доделать capabilities
 }
 
-// testStorage_Add_Limit_Overflow проверка того что при переполнении лимита, запись не добавляется в хранилище
-func testStorage_Add_Limit_Overflow(t *testing.T, p PrepareInterface) {
+// TestStorage_Add_Limit_Overflow проверка того что при переполнении лимита, запись не добавляется в хранилище
+func TestStorage_Add_Limit_Overflow(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -94,8 +94,8 @@ func testStorage_Add_Limit_Overflow(t *testing.T, p PrepareInterface) {
 	assert.Len(t, nodeList, limit, "Added more than "+strconv.Itoa(limit)+"one node")
 }
 
-// testStorage_GetAll проверка получения всех нод
-func testStorage_GetAll(t *testing.T, p PrepareInterface) {
+// TestStorage_GetAll проверка получения всех нод
+func TestStorage_GetAll(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -134,8 +134,8 @@ func testStorage_GetAll(t *testing.T, p PrepareInterface) {
 	}
 }
 
-// testStorage_GetByAddress проверка получения ноды по адресу
-func testStorage_GetByAddress(t *testing.T, p PrepareInterface) {
+// TestStorage_GetByAddress проверка получения ноды по адресу
+func TestStorage_GetByAddress(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -155,8 +155,8 @@ func testStorage_GetByAddress(t *testing.T, p PrepareInterface) {
 
 }
 
-// testStorage_GetBySession проверка получения ноды по sessionId
-func testStorage_GetBySession(t *testing.T, p PrepareInterface) {
+// TestStorage_GetBySession проверка получения ноды по sessionId
+func TestStorage_GetBySession(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -177,8 +177,8 @@ func testStorage_GetBySession(t *testing.T, p PrepareInterface) {
 
 }
 
-// testStorage_GetCountWithStatus проверка получения колличества нод с определенным статусом
-func testStorage_GetCountWithStatus(t *testing.T, p PrepareInterface) {
+// TestStorage_GetCountWithStatus проверка получения колличества нод с определенным статусом
+func TestStorage_GetCountWithStatus(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -200,8 +200,8 @@ func testStorage_GetCountWithStatus(t *testing.T, p PrepareInterface) {
 	assert.Equal(t, count, 1)
 }
 
-// testStorage_Remove проверка удаления ноды
-func testStorage_Remove(t *testing.T, p PrepareInterface) {
+// TestStorage_Remove проверка удаления ноды
+func TestStorage_Remove(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -216,8 +216,8 @@ func testStorage_Remove(t *testing.T, p PrepareInterface) {
 	assert.Error(t, err)
 }
 
-// testStorage_ReserveAvailable_Positive проверка резервирования ноды
-func testStorage_ReserveAvailable_Positive(t *testing.T, p PrepareInterface) {
+// TestStorage_ReserveAvailable_Positive проверка резервирования ноды
+func TestStorage_ReserveAvailable_Positive(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -242,8 +242,8 @@ func testStorage_ReserveAvailable_Positive(t *testing.T, p PrepareInterface) {
 	assert.Equal(t, pool.NodeStatusReserved, node.Status, "Node not Reserved")
 }
 
-// testStorage_ReserveAvailable_Negative проверка резервирования ноды, при условии отсутствия доступных нод
-func testStorage_ReserveAvailable_Negative(t *testing.T, p PrepareInterface) {
+// TestStorage_ReserveAvailable_Negative проверка резервирования ноды, при условии отсутствия доступных нод
+func TestStorage_ReserveAvailable_Negative(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -256,8 +256,8 @@ func testStorage_ReserveAvailable_Negative(t *testing.T, p PrepareInterface) {
 	assert.Error(t, err)
 }
 
-// testStorage_SetAvailable проверка изменения статуса ноды на Available
-func testStorage_SetAvailable(t *testing.T, p PrepareInterface) {
+// TestStorage_SetAvailable проверка изменения статуса ноды на Available
+func TestStorage_SetAvailable(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -275,8 +275,8 @@ func testStorage_SetAvailable(t *testing.T, p PrepareInterface) {
 	assert.Equal(t, pool.NodeStatusAvailable, node.Status, "Node not Available")
 }
 
-// testStorage_SetBusy проверка изменения статуса ноды на Busy
-func testStorage_SetBusy(t *testing.T, p PrepareInterface) {
+// TestStorage_SetBusy проверка изменения статуса ноды на Busy
+func TestStorage_SetBusy(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -296,8 +296,8 @@ func testStorage_SetBusy(t *testing.T, p PrepareInterface) {
 	assert.Equal(t, expectedSessionID, node.SessionID, "Not saved sessionID")
 }
 
-// testStorage_UpdateAdderss_UpdatesValue успешное обновления адреса ноды
-func testStorage_UpdateAdderss_UpdatesValue(t *testing.T, p PrepareInterface) {
+// TestStorage_UpdateAdderss_UpdatesValue успешное обновления адреса ноды
+func TestStorage_UpdateAdderss_UpdatesValue(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
@@ -316,8 +316,8 @@ func testStorage_UpdateAdderss_UpdatesValue(t *testing.T, p PrepareInterface) {
 	assert.Equal(t, expectedAddress, node.Address, "Not updated address")
 }
 
-// testStorage_UpdateAdderss_ReturnsErrNotFound попытка обновить несуществующую ноду
-func testStorage_UpdateAdderss_ReturnsErrNotFound(t *testing.T, p PrepareInterface) {
+// TestStorage_UpdateAdderss_ReturnsErrNotFound попытка обновить несуществующую ноду
+func TestStorage_UpdateAdderss_ReturnsErrNotFound(t *testing.T, p PrepareInterface) {
 	t.Parallel()
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()

@@ -71,10 +71,11 @@ func TestStrategy_Reserve_Negative_NotMatchCapabilities(t *testing.T) {
 func TestStrategy_Reserve_Negative_ReserveAvailable(t *testing.T) {
 	sm := new(pool.StorageMock)
 	eError := errors.New("Error")
-	sm.On("GetAll").Return([]pool.Node{{}}, nil)
+	sm.On("GetAll").Return([]pool.Node{{CapabilitiesList: []capabilities.Capabilities{{}}}}, nil)
 	cm := new(capabilities.ComparatorMock)
+	cm.On("Register", mock.AnythingOfType("capabilities.Capabilities")).Return()
 	cm.On("Compare", mock.AnythingOfType("capabilities.Capabilities"), mock.AnythingOfType("capabilities.Capabilities")).Return(true)
-	sm.On("ReserveAvailable", mock.AnythingOfType("[]pool.Node")).Return([]pool.Node{}, eError)
+	sm.On("ReserveAvailable", mock.AnythingOfType("[]pool.Node")).Return(pool.Node{}, eError)
 	s := Strategy{storage: sm, capsComparator: cm}
 	_, err := s.Reserve(capabilities.Capabilities{})
 	assert.NotNil(t, err)

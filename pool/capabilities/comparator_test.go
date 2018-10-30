@@ -65,6 +65,7 @@ func TestComparator_Compare(t *testing.T) {
 
 	comp := NewComparator()
 	for i, test := range dataProvider {
+		comp.Register(test.available)
 		result := comp.Compare(test.required, test.available)
 		assert.Equal(t, test.expectedResult, result, "Test #"+strconv.Itoa(i))
 	}
