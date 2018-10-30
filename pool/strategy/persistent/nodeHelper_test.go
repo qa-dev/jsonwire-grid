@@ -51,10 +51,11 @@ func TestNodeHelper_removeAllSessions_Negative_Sessions_Error(t *testing.T) {
 
 func TestNodeHelper_removeAllSessions_Negative_Sessions_MessageStatusNotOk(t *testing.T) {
 	cm := new(jsonwire.ClientMock)
+	cm.On("Address").Return("0.0.0.0")
 	nodeHelper := &nodeHelper{cm}
 	sessions := new(jsonwire.Sessions)
 	sessions.Status = 99999
-	cm.On("Sessions").Return(new(jsonwire.Sessions), errors.New("Err"))
+	cm.On("Sessions").Return(sessions, nil)
 	_, err := nodeHelper.removeAllSessions()
 	assert.NotNil(t, err)
 }
@@ -78,6 +79,7 @@ func TestNodeHelper_removeAllSessions_Negative_CloseSession_Error(t *testing.T) 
 
 func TestNodeHelper_removeAllSessions_Negative_CloseSession_MessageStatusNotOk(t *testing.T) {
 	cm := new(jsonwire.ClientMock)
+	cm.On("Address").Return("0.0.0.0")
 	nodeHelper := &nodeHelper{cm}
 	sessions := new(jsonwire.Sessions)
 	sessions.Value = []struct {
@@ -89,7 +91,7 @@ func TestNodeHelper_removeAllSessions_Negative_CloseSession_MessageStatusNotOk(t
 	cm.On("Sessions").Return(sessions, nil)
 	message := new(jsonwire.Message)
 	message.Status = 999999
-	cm.On("CloseSession", mock.AnythingOfType("string")).Return(message, errors.New("Err"))
+	cm.On("CloseSession", mock.AnythingOfType("string")).Return(message, nil)
 	_, err := nodeHelper.removeAllSessions()
 	assert.NotNil(t, err)
 }
