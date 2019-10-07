@@ -35,6 +35,18 @@ func (p *kubDnsProvider) Create(podName string, nodeParams nodeParams) (nodeAddr
 	container.Name = podName
 	container.Image = nodeParams.Image
 	port, err := strconv.Atoi(nodeParams.Port)
+	volume := apiV1.Volume{
+        Name: "dshm",
+        VolumeSource: apiV1.VolumeSource{
+            EmptyDir: &apiV1.EmptyDirVolumeSource{},
+        },
+    }
+    pod.Spec.Volumes = append(pod.Spec.Volumes, volume)
+    volumeMount := apiV1.VolumeMount{
+        Name:      "dshm",
+        MountPath: "/dev/shm",
+    }
+    container.VolumeMounts = append(container.VolumeMounts, volumeMount)
 	if err != nil {
 		return "", errors.New("convert to int nodeParams.Port, " + err.Error())
 	}
