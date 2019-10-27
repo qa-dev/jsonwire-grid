@@ -118,3 +118,6 @@ Configurations are stored in json files. Example:
 | params.pod_creation_timeout | string as `12m`, `60s` | Max waiting time for creating a pod.  |
 | node_list.[].params.image   | string                 | Docker image with selenium.           |
 | node_list.[].params.port    | string                 | Port of selenium.                     |
+
+## API
+- `/grid/status` - a method returns a status of a grid

@@ -3,7 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+
 	log "github.com/sirupsen/logrus"
+
 	"github.com/qa-dev/jsonwire-grid/config"
 	"github.com/qa-dev/jsonwire-grid/handlers"
 	"github.com/qa-dev/jsonwire-grid/logger"
@@ -12,10 +18,6 @@ import (
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	poolMetrics "github.com/qa-dev/jsonwire-grid/pool/metrics"
 	"github.com/qa-dev/jsonwire-grid/utils/metrics"
-	"net/http"
-	"os"
-	"os/signal"
-	"time"
 )
 
 func main() {
@@ -75,8 +77,6 @@ func main() {
 	poolInstance.SetBusyNodeDuration(busyNodeDuration)
 	poolInstance.SetReservedNodeDuration(reservedNodeDuration)
 
-
-
 	go func() {
 		for {
 			poolInstance.FixNodeStatuses()
@@ -93,8 +93,6 @@ func main() {
 		}
 	}()
 
-
-
 	if cfg.Statsd != nil {
 		statsdClient, err := metrics.NewStatsd(
 			cfg.Statsd.Host,
@@ -110,10 +108,11 @@ func main() {
 		}
 		middlewareWrap.Add(middleware.NewStatsd(log.StandardLogger(), statsdClient, true).RegisterMetrics)
 	}
-	
+
 	http.Handle("/wd/hub/session", middlewareWrap.Do(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory})) //selenium
 	http.Handle("/session", middlewareWrap.Do(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory}))        //wda
 	http.Handle("/grid/register", middlewareWrap.Do(&handlers.RegisterNode{Pool: poolInstance}))
+	http.Handle("/grid/status", middlewareWrap.Do(&handlers.GridStatus{Pool: poolInstance, Config: *cfg}))
 	http.Handle("/grid/api/proxy", &handlers.APIProxy{Pool: poolInstance})
 	http.HandleFunc("/_info", heartbeat)
 	http.Handle("/", middlewareWrap.Do(&handlers.UseSession{Pool: poolInstance, Cache: cache}))
