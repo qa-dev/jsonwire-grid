@@ -1,0 +1,14 @@
+before:
+  hooks:
+    - make gen
+builds:
+  - goos:
+      - linux
+      - darwin
+      - windows
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'

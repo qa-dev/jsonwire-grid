@@ -26,3 +26,4 @@ config.json
 /bindata.go
 dist/
 dbconfig.yml
+storage/migrations/mysql/bindata.go
