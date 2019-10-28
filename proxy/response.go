@@ -26,7 +26,7 @@ func (rw *ResponseWriter) Write(bytes []byte) (int, error) {
 	}
 	rw.Output = append(rw.Output, bytes...)
 
-	return 0, nil
+	return len(bytes), nil
 }
 
 func (rw *ResponseWriter) WriteHeader(i int) {
