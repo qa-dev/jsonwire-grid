@@ -5,9 +5,10 @@ import (
 	"strings"
 
 	"fmt"
+	"regexp"
+
 	"github.com/sirupsen/logrus"
 	"gopkg.in/alexcesaro/statsd.v2"
-	"regexp"
 )
 
 // Statsd is statsd metrics middleware.

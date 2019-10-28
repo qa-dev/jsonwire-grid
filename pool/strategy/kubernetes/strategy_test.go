@@ -2,12 +2,14 @@ package kubernetes
 
 import (
 	"errors"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"github.com/qa-dev/jsonwire-grid/pool/strategy"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"testing"
 )
 
 type providerMock struct {
@@ -142,7 +144,7 @@ func TestStrategy_FixNodeStatus_Positive(t *testing.T) {
 	sm := new(pool.StorageMock)
 	sm.On("Remove", mock.AnythingOfType("pool.Node")).Return(nil)
 	s := Strategy{storage: sm, provider: pm}
-	node := pool.Node{ Key: "valid_key", Type: pool.NodeTypeKubernetes}
+	node := pool.Node{Key: "valid_key", Type: pool.NodeTypeKubernetes}
 	err := s.FixNodeStatus(node)
 	assert.Nil(t, err)
 }

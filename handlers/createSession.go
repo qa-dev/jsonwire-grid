@@ -5,15 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"github.com/qa-dev/jsonwire-grid/jsonwire"
-	"github.com/qa-dev/jsonwire-grid/pool"
-	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
-	"github.com/qa-dev/jsonwire-grid/proxy"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+
+	log "github.com/sirupsen/logrus"
+
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
+	"github.com/qa-dev/jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
+	"github.com/qa-dev/jsonwire-grid/proxy"
 )
 
 // CreateSession - Receives requests to create session.

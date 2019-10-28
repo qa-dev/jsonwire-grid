@@ -3,13 +3,13 @@ package proxy
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
 
-	"errors"
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"github.com/qa-dev/jsonwire-grid/pool"
 )

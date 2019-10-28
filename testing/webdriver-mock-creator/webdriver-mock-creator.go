@@ -3,11 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"os/signal"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {

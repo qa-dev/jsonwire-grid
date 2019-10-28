@@ -33,8 +33,8 @@ type Register struct {
 	Class            json.RawMessage `json:"class,omitempty"`
 	Configuration    *Configuration  `json:"configuration,omitempty"`
 	CapabilitiesList []Capabilities  `json:"capabilities,omitempty"` // selenium 3
-	Description		 string			 `json:"description,omitempty"`
-	Name		 	 string			 `json:"name,omitempty"`
+	Description      string          `json:"description,omitempty"`
+	Name             string          `json:"name,omitempty"`
 }
 
 // Capabilities - structure of supported capabilities.
@@ -42,15 +42,15 @@ type Capabilities map[string]interface{}
 
 // Configuration - structure of node configuration.
 type Configuration struct {
-	ID         string `json:"id,omitempty"`
-	Proxy      string `json:"proxy,omitempty"`
-	Role       string `json:"role,omitempty"`
-	Hub        string `json:"hub,omitempty"`
-	Port       int    `json:"port,omitempty"`
-	RemoteHost string `json:"remoteHost,omitempty"`
-	Host       string `json:"host,omitempty"`
-	MaxSession int    `json:"maxSession,omitempty"`
-	HubHost    string `json:"hubHost,omitempty"`
+	ID               string         `json:"id,omitempty"`
+	Proxy            string         `json:"proxy,omitempty"`
+	Role             string         `json:"role,omitempty"`
+	Hub              string         `json:"hub,omitempty"`
+	Port             int            `json:"port,omitempty"`
+	RemoteHost       string         `json:"remoteHost,omitempty"`
+	Host             string         `json:"host,omitempty"`
+	MaxSession       int            `json:"maxSession,omitempty"`
+	HubHost          string         `json:"hubHost,omitempty"`
 	RegisterCycle    int            `json:"registerCycle,omitempty"`
 	HubPort          int            `json:"hubPort,omitempty"`
 	URL              string         `json:"url,omitempty"`

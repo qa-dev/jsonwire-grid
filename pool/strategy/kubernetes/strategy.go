@@ -2,12 +2,14 @@ package kubernetes
 
 import (
 	"errors"
+	"fmt"
+	"time"
+
+	uuid "github.com/satori/go.uuid"
+
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"github.com/qa-dev/jsonwire-grid/pool/strategy"
-	"github.com/satori/go.uuid"
-	"time"
-	"fmt"
 )
 
 type Strategy struct {

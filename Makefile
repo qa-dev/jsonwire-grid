@@ -6,7 +6,7 @@ all: get-deps build
 
 help:
 	@echo "build    - build application from sources"
-	@echo "fmt      - format application sources"
+	@echo "lint     - lint and fix application sources"
 	@echo "gen      - generate files"
 	@echo "prepare  - prepare project to build"
 	@echo "run      - start application"
@@ -15,8 +15,8 @@ build: prepare
 	@echo "Install jsonwire-grid"
 	go install github.com/qa-dev/jsonwire-grid
 
-fmt:
-	go fmt
+lint:
+	golangci-lint run --fix
 
 gen:
 	go-bindata -pkg mysql -o storage/migrations/mysql/bindata.go storage/migrations/mysql

@@ -1,9 +1,10 @@
 package middleware
 
 import (
-	"testing"
-	"github.com/sirupsen/logrus"
 	"net/http"
+	"testing"
+
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 

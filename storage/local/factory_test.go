@@ -1,9 +1,11 @@
 package local
 
 import (
-	"github.com/qa-dev/jsonwire-grid/config"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/qa-dev/jsonwire-grid/config"
 )
 
 func TestFactory_Create_Positive(t *testing.T) {

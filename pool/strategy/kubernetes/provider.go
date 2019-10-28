@@ -2,15 +2,17 @@ package kubernetes
 
 import (
 	"errors"
-	log "github.com/sirupsen/logrus"
-	"github.com/qa-dev/jsonwire-grid/jsonwire"
-	"k8s.io/client-go/kubernetes"
-	apiV1 "k8s.io/client-go/pkg/api/v1"
+	"fmt"
 	"net"
 	"strconv"
-	"time"
 	"strings"
-	"fmt"
+	"time"
+
+	log "github.com/sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
+	apiV1 "k8s.io/client-go/pkg/api/v1"
+
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
 )
 
 type kubernetesProviderInterface interface {
@@ -20,10 +22,10 @@ type kubernetesProviderInterface interface {
 }
 
 type kubDnsProvider struct {
-	clientset     *kubernetes.Clientset
-	namespace     string
-	podCreationTimeout     time.Duration
-	clientFactory jsonwire.ClientFactoryInterface
+	clientset          *kubernetes.Clientset
+	namespace          string
+	podCreationTimeout time.Duration
+	clientFactory      jsonwire.ClientFactoryInterface
 }
 
 func (p *kubDnsProvider) Create(podName string, nodeParams nodeParams) (nodeAddress string, err error) {
@@ -36,17 +38,17 @@ func (p *kubDnsProvider) Create(podName string, nodeParams nodeParams) (nodeAddr
 	container.Image = nodeParams.Image
 	port, err := strconv.Atoi(nodeParams.Port)
 	volume := apiV1.Volume{
-        Name: "dshm",
-        VolumeSource: apiV1.VolumeSource{
-            EmptyDir: &apiV1.EmptyDirVolumeSource{},
-        },
-    }
-    pod.Spec.Volumes = append(pod.Spec.Volumes, volume)
-    volumeMount := apiV1.VolumeMount{
-        Name:      "dshm",
-        MountPath: "/dev/shm",
-    }
-    container.VolumeMounts = append(container.VolumeMounts, volumeMount)
+		Name: "dshm",
+		VolumeSource: apiV1.VolumeSource{
+			EmptyDir: &apiV1.EmptyDirVolumeSource{},
+		},
+	}
+	pod.Spec.Volumes = append(pod.Spec.Volumes, volume)
+	volumeMount := apiV1.VolumeMount{
+		Name:      "dshm",
+		MountPath: "/dev/shm",
+	}
+	container.VolumeMounts = append(container.VolumeMounts, volumeMount)
 	if err != nil {
 		return "", errors.New("convert to int nodeParams.Port, " + err.Error())
 	}
@@ -69,7 +71,7 @@ LoopWaitIP:
 			time.Sleep(time.Second)
 			createdPod, err := p.clientset.CoreV1Client.Pods(p.namespace).Get(podName)
 			if err != nil {
-				log.Debugf("fail get created pod, %v, %v",podName, err)
+				log.Debugf("fail get created pod, %v, %v", podName, err)
 				continue
 			}
 			if createdPod.Status.PodIP == "" {

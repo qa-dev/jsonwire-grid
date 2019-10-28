@@ -1,11 +1,13 @@
 package metrics
 
 import (
+	"time"
+
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/alexcesaro/statsd.v2"
+
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
-	"gopkg.in/alexcesaro/statsd.v2"
-	"time"
 )
 
 // Sender - metrics sender.

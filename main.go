@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	stop := make(chan os.Signal)
+	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
 	cfg := config.New()

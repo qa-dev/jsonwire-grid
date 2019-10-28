@@ -1,8 +1,9 @@
 package pool
 
 import (
-	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 )
 
 type StorageMock struct {

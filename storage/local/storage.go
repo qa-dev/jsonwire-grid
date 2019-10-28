@@ -2,10 +2,11 @@ package local
 
 import (
 	"errors"
-	"github.com/qa-dev/jsonwire-grid/pool"
-	"github.com/qa-dev/jsonwire-grid/storage"
 	"sync"
 	"time"
+
+	"github.com/qa-dev/jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/storage"
 )
 
 type Storage struct {

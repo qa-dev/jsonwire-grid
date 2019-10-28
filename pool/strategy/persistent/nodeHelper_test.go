@@ -3,10 +3,12 @@ package persistent
 import (
 	"encoding/json"
 	"errors"
-	"github.com/qa-dev/jsonwire-grid/jsonwire"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"testing"
+
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
 )
 
 func TestNodeHelperFactory_create(t *testing.T) {

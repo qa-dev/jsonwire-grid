@@ -2,12 +2,14 @@ package pool
 
 import (
 	"errors"
-	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
-	"github.com/qa-dev/jsonwire-grid/pool/strategy"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
+	"github.com/qa-dev/jsonwire-grid/pool/strategy"
 )
 
 func TestNewPool(t *testing.T) {

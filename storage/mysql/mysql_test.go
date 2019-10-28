@@ -2,16 +2,17 @@ package mysql
 
 import (
 	"crypto/rand"
-	"errors"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
-	"github.com/qa-dev/jsonwire-grid/pool"
-	"github.com/qa-dev/jsonwire-grid/storage/tests"
-	"github.com/rubenv/sql-migrate"
 	"os"
 	"strings"
 	"testing"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
+	migrate "github.com/rubenv/sql-migrate"
+
+	"github.com/qa-dev/jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/storage/tests"
 )
 
 const (
@@ -48,17 +49,17 @@ func (p PrepareMysql) CreateStorage() (pool.StorageInterface, func()) {
 	const nameLen = 32
 	const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	var bytes = make([]byte, nameLen)
-	rand.Read(bytes)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		panic("Random read error: " + err.Error())
+	}
 	for k, v := range bytes {
 		bytes[k] = chars[v%byte(len(chars))]
 	}
 	dbName := "TEST_" + string(bytes)
-	_, err := commonDBConnection.Exec("CREATE DATABASE " + dbName)
+	_, err = commonDBConnection.Exec("CREATE DATABASE " + dbName)
 	if err != nil {
-		err = errors.New("Database create error: " + err.Error())
-	}
-	if err != nil {
-		panic(err.Error())
+		panic("Database create error: " + err.Error())
 	}
 
 	replace := strings.Replace(connectionString, dbNamePlaceholder, dbName, 1)
@@ -80,7 +81,7 @@ func (p PrepareMysql) CreateStorage() (pool.StorageInterface, func()) {
 		panic("Error initialisation storage: " + err.Error())
 	}
 	deferFunc := func() {
-		commonDBConnection.Exec("DROP DATABASE " + dbName)
+		_, _ = commonDBConnection.Exec("DROP DATABASE " + dbName)
 		db.Close()
 	}
 	return storage, deferFunc

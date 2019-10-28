@@ -4,6 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"fmt"
+
 	"github.com/qa-dev/jsonwire-grid/config"
 )
 

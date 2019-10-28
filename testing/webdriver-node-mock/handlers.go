@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"github.com/qa-dev/jsonwire-grid/jsonwire"
-	"github.com/satori/go.uuid"
 	"math/rand"
 	"net/http"
 	"regexp"
 	"time"
+
+	uuid "github.com/satori/go.uuid"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
 )
 
 var constResponse = RandStringRunes(10000)

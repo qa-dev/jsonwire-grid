@@ -1,10 +1,12 @@
 package local
 
 import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/storage"
-	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestStorage_Add_Positive(t *testing.T) {
@@ -164,6 +166,6 @@ func TestStorage_UpdateAddress_ReturnsErrNotFound(t *testing.T) {
 	key := "1234567890"
 	node := pool.Node{Address: "1", Key: key}
 	s := Storage{db: map[string]*pool.Node{key: &node}}
-	err := s.UpdateAddress(pool.Node{Key:"12345"}, "1234567890")
+	err := s.UpdateAddress(pool.Node{Key: "12345"}, "1234567890")
 	assert.Equal(t, storage.ErrNotFound, err)
 }

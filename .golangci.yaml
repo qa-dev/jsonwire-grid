@@ -1,0 +1,7 @@
+linters-settings:
+  goimports:
+    local-prefixes: github.com/qa-dev/jsonwire-grid
+linters:
+  enable:
+    - goimports
+    - gofmt
