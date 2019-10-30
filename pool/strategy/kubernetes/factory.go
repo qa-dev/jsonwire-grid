@@ -2,13 +2,15 @@ package kubernetes
 
 import (
 	"errors"
+
+	log "github.com/sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+
 	"github.com/qa-dev/jsonwire-grid/config"
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	log "github.com/sirupsen/logrus"
 )
 
 type StrategyFactory struct {
@@ -46,10 +48,10 @@ func (f *StrategyFactory) Create(
 	}
 
 	provider := &kubDnsProvider{
-		clientset:     clientset,
-		namespace:     strategyConfig.Params.Namespace,
+		clientset:          clientset,
+		namespace:          strategyConfig.Params.Namespace,
 		podCreationTimeout: strategyConfig.Params.PodCreationTimeout,
-		clientFactory: clientFactory,
+		clientFactory:      clientFactory,
 	}
 
 	return &Strategy{

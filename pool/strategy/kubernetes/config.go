@@ -3,21 +3,22 @@ package kubernetes
 import (
 	"encoding/json"
 	"errors"
-	"github.com/qa-dev/jsonwire-grid/config"
-	"time"
 	"fmt"
+	"time"
+
+	"github.com/qa-dev/jsonwire-grid/config"
 )
 
 type strategyParams struct {
-	Namespace string
+	Namespace          string
 	PodCreationTimeout time.Duration
 }
 
 func (sp *strategyParams) UnmarshalJSON(b []byte) error {
-	tempStruct :=  struct{
-		Namespace string `json:"namespace"`
+	tempStruct := struct {
+		Namespace          string `json:"namespace"`
 		PodCreationTimeout string `json:"pod_creation_timeout"`
-	} {
+	}{
 		"default",
 		"1m",
 	}

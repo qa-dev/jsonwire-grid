@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"runtime/debug"
+
 	"github.com/sirupsen/logrus"
 )
 

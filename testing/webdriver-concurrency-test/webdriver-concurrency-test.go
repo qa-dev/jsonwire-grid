@@ -6,7 +6,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,6 +16,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
 )
 
 var (
@@ -40,7 +41,7 @@ func main() {
 	}
 	var counter uint64 = 0
 
-	stop := make(chan os.Signal)
+	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 	wg := sync.WaitGroup{}
 	isAlive := true
@@ -64,8 +65,8 @@ func main() {
 	go func() {
 		for i := 1; i <= *level && isAlive; i++ {
 			time.Sleep(time.Millisecond * 100)
+			wg.Add(1)
 			go func() {
-				wg.Add(1)
 				defer wg.Done()
 				for {
 					if !isAlive {
@@ -93,8 +94,8 @@ func main() {
 	wg.Wait()
 
 	//wait interrupt child process
-	cmd.Process.Signal(os.Interrupt)
-	cmd.Wait()
+	_ = cmd.Process.Signal(os.Interrupt)
+	_ = cmd.Wait()
 
 	if err != nil {
 		log.Fatalf("Tests failed: %v, ", err)

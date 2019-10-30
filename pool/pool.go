@@ -5,7 +5,9 @@ import (
 
 	"errors"
 	"fmt"
+
 	log "github.com/sirupsen/logrus"
+
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 )
 

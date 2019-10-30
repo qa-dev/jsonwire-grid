@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"io/ioutil"
 	"math/rand"
 	"net"
@@ -14,6 +12,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
+
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
 )
 
 var currentSessionID, host, hubUrl, id string

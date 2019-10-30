@@ -3,9 +3,11 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	log "github.com/sirupsen/logrus"
-	"github.com/qa-dev/jsonwire-grid/pool/metrics"
 	"os"
+
+	log "github.com/sirupsen/logrus"
+
+	"github.com/qa-dev/jsonwire-grid/pool/metrics"
 )
 
 // Config - settings of application.

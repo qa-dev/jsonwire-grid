@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
+
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"

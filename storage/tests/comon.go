@@ -1,12 +1,14 @@
 package tests
 
 import (
-	storageLib "github.com/qa-dev/jsonwire-grid/storage"
-	"github.com/qa-dev/jsonwire-grid/pool"
-	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
-	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/qa-dev/jsonwire-grid/pool"
+	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
+	storageLib "github.com/qa-dev/jsonwire-grid/storage"
 )
 
 // Сделано для того чтобы тестировать одним набором тестов все реализации
@@ -23,7 +25,7 @@ func TestStorage_Add(t *testing.T, p PrepareInterface) {
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
 	expectedNode := pool.Node{
-		Key: "111",
+		Key:     "111",
 		Address: "address1",
 		CapabilitiesList: []capabilities.Capabilities{
 			{"trololo": "lolo"},
@@ -56,7 +58,7 @@ func TestStorage_Add_Repeat(t *testing.T, p PrepareInterface) {
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
 	node := pool.Node{
-		Key:          "ololo",
+		Key:              "ololo",
 		Address:          "ololo",
 		CapabilitiesList: []capabilities.Capabilities{{"trololo": "lolo"}},
 	}
@@ -78,7 +80,7 @@ func TestStorage_Add_Limit_Overflow(t *testing.T, p PrepareInterface) {
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
 	node := pool.Node{
-		Key:          "ololo",
+		Key:              "ololo",
 		Address:          "ololo",
 		CapabilitiesList: []capabilities.Capabilities{{"trololo": "lolo"}},
 		Type:             pool.NodeTypePersistent,
@@ -102,7 +104,7 @@ func TestStorage_GetAll(t *testing.T, p PrepareInterface) {
 	expectedNodeList := make([]pool.Node, 0)
 	for _, addr := range []string{"addr1", "addr2"} {
 		node := pool.Node{
-			Key: addr,
+			Key:              addr,
 			Address:          addr,
 			CapabilitiesList: []capabilities.Capabilities{{"trololo": "lolo"}},
 		}
@@ -252,7 +254,7 @@ func TestStorage_ReserveAvailable_Negative(t *testing.T, p PrepareInterface) {
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
 	}
-	node, err = storage.ReserveAvailable([]pool.Node{{Key: "qqqqqq"}})
+	_, err = storage.ReserveAvailable([]pool.Node{{Key: "qqqqqq"}})
 	assert.Error(t, err)
 }
 
@@ -322,7 +324,7 @@ func TestStorage_UpdateAdderss_ReturnsErrNotFound(t *testing.T, p PrepareInterfa
 	storage, deferFunc := p.CreateStorage()
 	defer deferFunc()
 	node := pool.Node{SessionID: "sess", Key: "123", Status: pool.NodeStatusAvailable, Address: "qqqqqq", CapabilitiesList: []capabilities.Capabilities{{"1": "2"}}}
-	err := storage.Add(pool.Node{Key:"12345"}, 0)
+	err := storage.Add(pool.Node{Key: "12345"}, 0)
 	if err != nil {
 		t.Fatal("Error add node, " + err.Error())
 	}

@@ -2,6 +2,7 @@ package persistent
 
 import (
 	"fmt"
+
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 )
 

@@ -1,9 +1,10 @@
 package capabilities
 
 import (
-	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewComparator(t *testing.T) {

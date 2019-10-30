@@ -2,9 +2,11 @@ package main
 
 import (
 	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/qa-dev/jsonwire-grid/config"
 
 	"errors"
+
 	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"

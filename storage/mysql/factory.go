@@ -2,13 +2,15 @@ package mysql
 
 import (
 	"errors"
-	log "github.com/sirupsen/logrus"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	migrate "github.com/rubenv/sql-migrate"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/qa-dev/jsonwire-grid/config"
 	"github.com/qa-dev/jsonwire-grid/pool"
 	mysqlMigrations "github.com/qa-dev/jsonwire-grid/storage/migrations/mysql"
-	"github.com/rubenv/sql-migrate"
 )
 
 type Factory struct {

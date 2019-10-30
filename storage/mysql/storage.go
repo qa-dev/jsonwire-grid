@@ -3,12 +3,14 @@ package mysql
 import (
 	"database/sql"
 	"errors"
+	"strconv"
+	"time"
+
 	"github.com/jmoiron/sqlx"
+
 	"github.com/qa-dev/jsonwire-grid/pool"
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"github.com/qa-dev/jsonwire-grid/storage"
-	"strconv"
-	"time"
 )
 
 type MysqlNodeModel struct {
@@ -23,11 +25,11 @@ type MysqlNodeModel struct {
 }
 
 type MysqlCapabilitiesModel struct {
-	ID          int    `db:"id"`
-	NodeKey     string `db:"nodeKey"`
-	SetID       string `db:"setId"`
-	Name        string `db:"name"`
-	Value       string `db:"value"`
+	ID      int    `db:"id"`
+	NodeKey string `db:"nodeKey"`
+	SetID   string `db:"setId"`
+	Name    string `db:"name"`
+	Value   string `db:"value"`
 }
 
 type MysqlStorage struct {
@@ -53,7 +55,7 @@ func (s *MysqlStorage) Add(node pool.Node, limit int) error {
 			"ON DUPLICATE KEY UPDATE "+
 			"type = :type, address = :address, status = :status, sessionId = :sessionId, updated = :updated, registred = :registred",
 		map[string]interface{}{
-			"key":      node.Key,
+			"key":       node.Key,
 			"type":      string(node.Type),
 			"address":   node.Address,
 			"sessionId": node.SessionID,
@@ -90,9 +92,9 @@ func (s *MysqlStorage) Add(node pool.Node, limit int) error {
 		for name, value := range caps {
 			preparedCapability = map[string]interface{}{
 				"nodeKey": node.Key,
-				"setId":       node.Key + "|" + strconv.Itoa(i), // просто уникальное значение для сета
-				"name":        name,
-				"value":       value,
+				"setId":   node.Key + "|" + strconv.Itoa(i), // просто уникальное значение для сета
+				"name":    name,
+				"value":   value,
 			}
 			preparedCapabilities = append(preparedCapabilities, preparedCapability)
 		}

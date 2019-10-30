@@ -3,12 +3,13 @@ package wda
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/qa-dev/jsonwire-grid/jsonwire"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/qa-dev/jsonwire-grid/jsonwire"
 )
 
 type Client struct {

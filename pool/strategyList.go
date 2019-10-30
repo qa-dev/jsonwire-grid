@@ -2,6 +2,7 @@ package pool
 
 import (
 	"errors"
+
 	"github.com/qa-dev/jsonwire-grid/pool/capabilities"
 	"github.com/qa-dev/jsonwire-grid/pool/strategy"
 )
