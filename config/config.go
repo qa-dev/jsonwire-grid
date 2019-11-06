@@ -3,9 +3,8 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	"os"
-
 	log "github.com/sirupsen/logrus"
+	"os"
 
 	"github.com/qa-dev/jsonwire-grid/pool/metrics"
 )
@@ -20,12 +19,14 @@ type Config struct {
 
 // Grid general settings
 type Grid struct {
-	ClientType       string     `json:"client_type"`
-	Port             int        `json:"port"`
-	StrategyList     []Strategy `json:"strategy_list"`
-	BusyNodeDuration string     `json:"busy_node_duration"` // duration string format ex. 12m, see time.ParseDuration()
+	ClientType   string     `json:"client_type"`
+	Port         int        `json:"port"`
+	StrategyList []Strategy `json:"strategy_list"`
+	// duration string format ex. 12m, see time.ParseDuration()
+	BusyNodeDuration string `json:"busy_node_duration"`
 	// todo: выпилить и сделать равным дедлайну http запроса
-	ReservedDuration string `json:"reserved_node_duration"` // duration string format ex. 12m, see time.ParseDuration()
+	ReservedDuration string `json:"reserved_node_duration"`
+	FixNodeTimeout   string `json:"fix_node_timeout"`
 }
 
 // Strategy - Describes the algorithm of node selection.
@@ -63,9 +64,19 @@ type Statsd struct {
 	CapabilitiesList []metrics.CapabilitiesSelector `json:"selectors"`
 }
 
-// New - Constructor of config.
+// New - Constructor of config with default values
 func New() *Config {
-	return &Config{}
+	return &Config{Logger: Logger{Level: "debug"},
+		DB: DB{Implementation: "local"},
+		Grid: Grid{
+			ClientType:       "selenium",
+			Port:             4444,
+			StrategyList:     []Strategy{{Type: "persistent"}},
+			ReservedDuration: "5m",
+			BusyNodeDuration: "15m",
+			FixNodeTimeout:   "5m",
+		},
+	}
 }
 
 // LoadFromFile - config loader from json file.

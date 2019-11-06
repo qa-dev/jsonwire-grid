@@ -44,6 +44,10 @@ func main() {
 	if err != nil {
 		log.Fatal("Invalid value grid.reserved_node_duration in config")
 	}
+	fixNodeDuration, err := time.ParseDuration(cfg.Grid.FixNodeTimeout)
+	if err != nil {
+		log.Fatal("Invalid value grid.fix_node_timeout in config")
+	}
 	storageFactory, err := invokeStorageFactory(*cfg)
 	if err != nil {
 		log.Fatalf("Can't invoke storage factory, %s", err)
@@ -80,7 +84,7 @@ func main() {
 	go func() {
 		for {
 			poolInstance.FixNodeStatuses()
-			time.Sleep(time.Minute * 5) // todo: move to config
+			time.Sleep(fixNodeDuration)
 		}
 	}()
 
