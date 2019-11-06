@@ -27,7 +27,7 @@ type Grid struct {
 	BusyNodeDuration string `json:"busy_node_duration"`
 	// todo: выпилить и сделать равным дедлайну http запроса
 	ReservedDuration string `json:"reserved_node_duration"`
-	FixNodeTimeout   string `json:"fix_node_timeout"`
+	FixNodeTimeout   string `json:"fix_node_timeout,omitempty"`
 }
 
 // Strategy - Describes the algorithm of node selection.
