@@ -3,9 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/qa-dev/jsonwire-grid/pool"
-	log "github.com/sirupsen/logrus"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
+
+	"github.com/qa-dev/jsonwire-grid/pool"
 )
 
 // SessionInfo - Returns a session info (node address, status, etc)
