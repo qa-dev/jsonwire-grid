@@ -117,6 +117,7 @@ func main() {
 	http.Handle("/session", middlewareWrap.Do(&handlers.CreateSession{Pool: poolInstance, ClientFactory: clientFactory}))        //wda
 	http.Handle("/grid/register", middlewareWrap.Do(&handlers.RegisterNode{Pool: poolInstance}))
 	http.Handle("/grid/status", middlewareWrap.Do(&handlers.GridStatus{Pool: poolInstance, Config: *cfg}))
+	http.Handle("/grid/session/info", middlewareWrap.Do(&handlers.SessionInfo{Pool: poolInstance}))
 	http.Handle("/grid/api/proxy", &handlers.APIProxy{Pool: poolInstance})
 	http.HandleFunc("/_info", heartbeat)
 	http.Handle("/", middlewareWrap.Do(&handlers.UseSession{Pool: poolInstance, Cache: cache}))
