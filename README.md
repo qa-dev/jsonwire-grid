@@ -121,3 +121,5 @@ Configurations are stored in json files. Example:
 
 ## API
 - `/grid/status` - a method returns a status of a grid
+- `/grid/session/info` - a returns a session info by session id. 
+ Еxample: `curl -X http://localhost:4444/grid/session/info?sessionid=9fc185d2-7a3d-4660-877f-cd4ca2a2f5c3`
