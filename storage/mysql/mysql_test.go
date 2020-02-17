@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"crypto/rand"
 	"fmt"
 	"os"
 	"strings"
@@ -46,18 +45,9 @@ func (p PrepareMysql) TearDown() {
 }
 
 func (p PrepareMysql) CreateStorage() (pool.StorageInterface, func()) {
-	const nameLen = 32
-	const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	var bytes = make([]byte, nameLen)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		panic("Random read error: " + err.Error())
-	}
-	for k, v := range bytes {
-		bytes[k] = chars[v%byte(len(chars))]
-	}
-	dbName := "TEST_" + string(bytes)
-	_, err = commonDBConnection.Exec("CREATE DATABASE " + dbName)
+
+	dbName := tests.CreateDbName()
+	_, err := commonDBConnection.Exec("CREATE DATABASE " + dbName)
 	if err != nil {
 		panic("Database create error: " + err.Error())
 	}
