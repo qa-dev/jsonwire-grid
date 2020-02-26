@@ -112,7 +112,6 @@ func (s *Strategy) registerCapabilities(nodeList []pool.Node) {
 	for _, node := range nodeList {
 		for _, availableCaps := range node.CapabilitiesList {
 			s.capsComparator.Register(availableCaps)
-
 		}
 	}
 }

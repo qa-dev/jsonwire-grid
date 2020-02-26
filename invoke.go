@@ -3,6 +3,8 @@ package main
 import (
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/qa-dev/jsonwire-grid/storage/mongo"
+
 	"github.com/qa-dev/jsonwire-grid/config"
 
 	"errors"
@@ -32,6 +34,13 @@ func invokeStorageFactory(config config.Config) (factory StorageFactoryInterface
 		factory = new(mysql.Factory)
 	case "local":
 		factory = new(local.Factory)
+	case "mongo":
+		for _, s := range config.Grid.StrategyList {
+			if s.Type != string(pool.NodeTypePersistent) {
+				err = errors.New("Invalid config: Mongo db supports only persistent node strategy ")
+			}
+		}
+		factory = new(mongo.Factory)
 	default:
 		err = errors.New("Invalid config, unknown param [db.implementation=" + config.DB.Implementation + "]")
 	}

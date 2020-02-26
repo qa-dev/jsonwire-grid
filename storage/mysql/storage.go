@@ -177,7 +177,6 @@ func (s *MysqlStorage) ReserveAvailable(nodeList []pool.Node) (pool.Node, error)
 	err = tx.Commit()
 	if err != nil {
 		return pool.Node{}, errors.New("[MysqlStorage/ReserveAvailable] commit transaction: " + err.Error())
-
 	}
 
 	return *mapper(nodeModel), nil

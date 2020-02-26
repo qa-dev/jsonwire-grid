@@ -48,7 +48,6 @@ func (s *Strategy) Reserve(desiredCaps capabilities.Capabilities) (pool.Node, er
 	}
 	node.Address = nodeAddress
 	return *node, nil
-
 }
 
 func (s *Strategy) CleanUp(node pool.Node) error {

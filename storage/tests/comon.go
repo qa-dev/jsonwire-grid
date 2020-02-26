@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"crypto/rand"
 	"strconv"
 	"testing"
 
@@ -16,6 +17,22 @@ type PrepareInterface interface {
 	SetUp()
 	TearDown()
 	CreateStorage() (pool.StorageInterface, func())
+}
+
+// CreateDbName генерирует имя тестовой бд
+func CreateDbName() string {
+	const nameLen = 32
+	const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	var bytes = make([]byte, nameLen)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		panic("Random read error: " + err.Error())
+	}
+	for k, v := range bytes {
+		bytes[k] = chars[v%byte(len(chars))]
+	}
+	dbName := "TEST_" + string(bytes)
+	return dbName
 }
 
 // TestStorage_Add проверка корректости добавления ноды в хранилище
