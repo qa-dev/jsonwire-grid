@@ -3,12 +3,13 @@ package mongo
 import (
 	"context"
 	"errors"
+	"strconv"
+	"strings"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/bsonx"
-	"strconv"
-	"strings"
 
 	"github.com/qa-dev/jsonwire-grid/config"
 	"github.com/qa-dev/jsonwire-grid/pool"
@@ -58,7 +59,7 @@ func (f *Factory) Create(cfg config.Config) (pool.StorageInterface, error) {
 func checkServerVersion(ctx context.Context, client *mongo.Client) error {
 	serverStatus, err := client.Database("admin").RunCommand(
 		ctx,
-		bsonx.Doc{{"serverStatus", bsonx.Int32(1)}},
+		bsonx.Doc{bsonx.Elem{Key: "serverStatus", Value: bsonx.Int32(1)}},
 	).DecodeBytes()
 	if err != nil {
 		return err
@@ -69,7 +70,7 @@ func checkServerVersion(ctx context.Context, client *mongo.Client) error {
 		return err
 	}
 
-	majorVersion, err := strconv.Atoi(strings.Split(version.StringValue(), ".")[0])
+	majorVersion, _ := strconv.Atoi(strings.Split(version.StringValue(), ".")[0])
 	if majorVersion < 4 {
 		return errors.New("mongodb version not supported: " + version.StringValue())
 	}
