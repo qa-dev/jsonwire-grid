@@ -71,7 +71,7 @@ Configurations are stored in json files. Example:
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | mysql             | [spec](https://github.com/go-sql-driver/mysql#dsn-data-source-name), example `db_user:db_pass@(db_host:3306)/db_name?parseTime=true` (parseTime=true - required option) |
 | local             | omit this property, because every instance have its own in-memory storage                                                                                               |
-| mongo             | NOTE! Mongo db temporary supports only persistent node strategy, example `mongodb://localhost:27017`
+| mongo             | NOTE! Mongo db supports only persistent node strateg and version from 4.0, example `mongodb://localhost:27017`
 
 ### Statsd - Configuration of metrics(optional).
 | Option          | Possible values | Description            |

@@ -3,10 +3,12 @@ package mongo
 import (
 	"context"
 	"errors"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/x/bsonx"
+	"strconv"
+	"strings"
 
 	"github.com/qa-dev/jsonwire-grid/config"
 	"github.com/qa-dev/jsonwire-grid/pool"
@@ -29,6 +31,12 @@ func (f *Factory) Create(cfg config.Config) (pool.StorageInterface, error) {
 	}
 
 	db := client.Database(cfg.DB.DbName)
+	err = checkServerVersion(ctx, client)
+	if err != nil {
+		err = errors.New("version check error: " + err.Error())
+		return nil, err
+	}
+
 	s := NewMongoStorage(db)
 	mod := mongo.IndexModel{
 		Keys: bson.M{
@@ -43,5 +51,27 @@ func (f *Factory) Create(cfg config.Config) (pool.StorageInterface, error) {
 		err = errors.New("Create index error: " + err.Error())
 		return nil, err
 	}
+
 	return s, nil
+}
+
+func checkServerVersion(ctx context.Context, client *mongo.Client) error {
+	serverStatus, err := client.Database("admin").RunCommand(
+		ctx,
+		bsonx.Doc{{"serverStatus", bsonx.Int32(1)}},
+	).DecodeBytes()
+	if err != nil {
+		return err
+	}
+
+	version, err := serverStatus.LookupErr("version")
+	if err != nil {
+		return err
+	}
+
+	majorVersion, err := strconv.Atoi(strings.Split(version.StringValue(), ".")[0])
+	if majorVersion < 4 {
+		return errors.New("mongodb version not supported: " + version.StringValue())
+	}
+	return nil
 }
