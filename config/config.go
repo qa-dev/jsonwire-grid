@@ -53,6 +53,7 @@ type Logger struct {
 type DB struct {
 	Implementation string `json:"implementation"`
 	Connection     string `json:"connection"`
+	DbName         string `json:"db_name"`
 }
 
 // Statsd - Settings of metrics sender.

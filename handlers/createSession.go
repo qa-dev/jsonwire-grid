@@ -74,7 +74,7 @@ func (h *CreateSession) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 func (h *CreateSession) tryCreateSession(r *http.Request, capabilities *capabilities.Capabilities) (*proxy.ResponseWriter, error) {
 	select {
 	case <-r.Context().Done():
-		err := errors.New("Request cancelled by client, " + r.Context().Err().Error())
+		err := errors.New("Request canceled by client, " + r.Context().Err().Error())
 		return nil, err
 	default:
 	}

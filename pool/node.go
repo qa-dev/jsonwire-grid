@@ -22,14 +22,14 @@ type Node struct {
 	// The value may depend on the strategy:
 	// - for constant nodes ip: port
 	// - for temporary pod.name
-	Key              string                      `json:"key"`
-	Type             NodeType                    `json:"type"`
-	Address          string                      `json:"address"`
-	Status           NodeStatus                  `json:"status"`
-	SessionID        string                      `json:"session_id"`
-	Updated          int64                       `json:"updated"`
-	Registered       int64                       `json:"registered"`
-	CapabilitiesList []capabilities.Capabilities `json:"capabilities_list"`
+	Key              string                      `json:"key" bson:"key"`
+	Type             NodeType                    `json:"type" bson:"type"`
+	Address          string                      `json:"address" bson:"address"`
+	Status           NodeStatus                  `json:"status" bson:"status"`
+	SessionID        string                      `json:"session_id" bson:"session_id"`
+	Updated          int64                       `json:"updated" bson:"updated"`
+	Registered       int64                       `json:"registered" bson:"registered"`
+	CapabilitiesList []capabilities.Capabilities `json:"capabilities_list" bson:"capabilities_list"`
 }
 
 func (n *Node) String() string {

@@ -60,10 +60,10 @@ Configurations are stored in json files. Example:
 | logger.level  | `debug`, `info`, `warning`, `error` | Logging level.         |
 
 ### DB - Configuration of storage.
-| Option            | Possible values  | Description                                |
-| ----------------- | ---------------  | ------------------------------------------ |
-| db.implementation | `mysql`, `local` | Select your favorite db, or local storage. |
-| db.connection     | see next table   | DSN for your db.                           |
+| Option            | Possible values          | Description                                |
+| ----------------- | ------------------------ | ------------------------------------------ |
+| db.implementation | `mysql`, `local`, `mongo`| Select your favorite db, or local storage. |
+| db.connection     | see next table           | DSN for your db.                           |
 
 >Note: Note: Local (in-memory) storage does not support common session storage between grid-instances.
 
@@ -71,6 +71,7 @@ Configurations are stored in json files. Example:
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | mysql             | [spec](https://github.com/go-sql-driver/mysql#dsn-data-source-name), example `db_user:db_pass@(db_host:3306)/db_name?parseTime=true` (parseTime=true - required option) |
 | local             | omit this property, because every instance have its own in-memory storage                                                                                               |
+| mongo             | NOTE! Mongo db supports only persistent node strateg and version from 4.0, example `mongodb://localhost:27017`
 
 ### Statsd - Configuration of metrics(optional).
 | Option          | Possible values | Description            |
